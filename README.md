@@ -14,7 +14,7 @@ The tool does not rely on any database of known faces or identities, rather it b
 
 3) After all the faces are found, the workflow will begin iterating over all the found faces and will prompt you to label them. Start by typing in the names for new unknown faces. Once a face has been labeled it will be added to a list of known faces. When there are known faces in the list, the face recognition algorithm will check for matches with the known faces and ask you to confirm its prediction if a match is found, otherwise you'll be prompted to enter a new name or choose a name from the list of names that have already been entered.
 
-4) Save/embed the face locations (bounding boxes) and names of the person(s) shown in the image's metadata. Face locations along with names are saved in the MGW Regions List uri. Names are also saved in the XMP:EXT4 PersonInImage field.
+4) Click 'Write Metadata' to save/embed the face locations (bounding boxes) and names of the person(s) shown in the image's metadata. Face locations along with names are saved in the MGW Regions List uri. Names are also saved in the XMP:EXT4 PersonInImage field.
 
 ## Environment Setup and Dependencies
 
@@ -42,10 +42,10 @@ Additionally, [Exiftool](https://exiftool.org/) must be installed on your system
 
 ## Launching the tool
 
-To launch the streamlit server within the virtual environment, run the following command while the virtual environment is activated (you should see (streamlit_env1) in your command prompt):
+To launch the streamlit server within the virtual environment, run the following command while the virtual environment is activated (you should see (facelabelerpilot_env) in your command prompt):
 
 ```
-streamlit run streamlit_faces.py
+streamlit run face_labeler_pilot_workflow.py
 ```
 
 Then open http://localhost:8501
