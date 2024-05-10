@@ -145,7 +145,7 @@ if 'faces_detected' in sess:
                 with st.form(str(uuid.uuid4())):
                     st.image(img, width=100)
                     if sess.match:
-                        st.write(f'I think this face belongs to {predicted_name}, can you confirm?')
+                        st.write(f'I think this face belongs to **{predicted_name}**, can you confirm?')
                         selected_name = st.selectbox(label=('Select "Not a face" to skip this face. '
                                                             'Select "Someone else" if their name is not in the list.'),
                                                      options=['Not a face', 'Someone else'] + sorted(
@@ -154,7 +154,7 @@ if 'faces_detected' in sess:
                                                          predicted_name) + 2,
                                                      key='selected_name')
                     elif not sess.match:
-                        st.write((f"I think this face belongs to {predicted_name}, "
+                        st.write((f"I think this face belongs to **{predicted_name}**, "
                                   "but you think it's someone else, who do you think this is?"))
                         selected_name = st_free_text_select(label=('Who do you think this is? '
                                                                    'Type in a new name or select one from the list. '
