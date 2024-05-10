@@ -90,7 +90,7 @@ st.text(textwrap.dedent('''
 
 IMG_DIR = "watch_folder"
 
-folder_names = [folder for folder in os.listdir(IMG_DIR) if not folder.startswith(".")]
+folder_names = [d for d in os.listdir(IMG_DIR) if os.path.isdir(os.path.join(IMG_DIR, d))]
 
 select_folder = st.selectbox(label='Choose a folder of images to scan for faces',
                              options=folder_names)
