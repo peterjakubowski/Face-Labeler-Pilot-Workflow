@@ -15,7 +15,7 @@ import textwrap
 
 
 # @ st.cache_data(show_spinner=False)
-def strip_faces(path):
+def strip_faces(img_paths):
     # initialize status bar
     _status_bar = st.progress(0, 'Firing up the face detection algorithm!')
     time.sleep(1)
@@ -23,12 +23,12 @@ def strip_faces(path):
     # queue is a list of tuples (image path, face bounding box, face encoding)
     q = deque()
     # iterate over all image paths is the selected directory and gather all detected faces and face encodings
-    for i in range(len(path)):
+    for i in range(len(img_paths)):
         # update progress
-        _status_bar.progress((i + 1) / len(path),
-                             text=f'({i + 1} of {len(path)}) Detecting faces in {path[i].split("/")[-1]}...')
+        _status_bar.progress((i + 1) / len(img_paths),
+                             text=f'({i + 1} of {len(img_paths)}) Detecting faces in {img_paths[i].split("/")[-1]}...')
         # open image
-        image = cv2.imread(path[i])
+        image = cv2.imread(img_paths[i])
         # convert image color from BGR to RGB
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         # resize the image for fast inference
@@ -45,7 +45,7 @@ def strip_faces(path):
                                                         num_jitters=1,
                                                         model="large")
             # update the queue
-            q.append((path[i], (_top * 4, _right * 4, _bottom * 4, _left * 4), encodings, True))
+            q.append((img_paths[i], (_top * 4, _right * 4, _bottom * 4, _left * 4), encodings, True))
 
     _status_bar.empty()
 
@@ -53,30 +53,28 @@ def strip_faces(path):
 
 
 def record_name():
-    if not sess.selected_name:
-        sess['faces_detected'].appendleft((sess.img_path,
-                                           sess.face_location,
-                                           sess.encoding,
-                                           True)
-                                          )
-    elif sess.selected_name == 'Someone else':
-        sess['faces_detected'].appendleft((sess.img_path,
-                                           sess.face_location,
-                                           sess.encoding,
-                                           False)
-                                          )
-    elif sess.selected_name != 'Not a face':
-        sess.name_options[sess.selected_name] += 1
-        sess.face_i += 1
-        if sess.img_path not in sess.labeled:
-            sess.labeled[sess.img_path] = {'face_locations': [], 'person_shown': []}
-        sess.labeled[sess.img_path]['face_locations'].append(sess.face_location)
-        sess.labeled[sess.img_path]['person_shown'].append(sess.selected_name)
-        if len(sess.encoding) > 0:
-            sess.data['encodings'].append(sess.encoding[0])
-            sess.data['names'].append(sess.selected_name)
-    else:
-        sess.faces_count -= 1
+    if sess.selected_name:
+        if sess.selected_name == 'Someone else':
+            sess['faces_detected'].popleft()
+            sess['faces_detected'].appendleft((sess.img_path,
+                                               sess.face_location,
+                                               sess.encoding,
+                                               False)
+                                              )
+        elif sess.selected_name != 'Not a face':
+            sess['faces_detected'].popleft()
+            sess.name_options[sess.selected_name] += 1
+            sess.face_i += 1
+            if sess.img_path not in sess.labeled:
+                sess.labeled[sess.img_path] = {'face_locations': [], 'person_shown': []}
+            sess.labeled[sess.img_path]['face_locations'].append(sess.face_location)
+            sess.labeled[sess.img_path]['person_shown'].append(sess.selected_name)
+            if len(sess.encoding) > 0:
+                sess.data['encodings'].append(sess.encoding[0])
+                sess.data['names'].append(sess.selected_name)
+        else:
+            sess['faces_detected'].popleft()
+            sess.faces_count -= 1
 
     return
 
@@ -117,13 +115,12 @@ if 'faces_detected' in sess:
         # ask the user if the workflow should automatically confirm/accept matches
         auto_confirm_matches = st.checkbox(label="Auto confirm matches?",
                                            value=False,
-                                           key='auto_confirm_matches',
-                                           on_change=record_name
+                                           key='auto_confirm_matches'
                                            )
         status_bar = st.progress(sess.face_i / sess.faces_count,
                                  text=f'Labeling face {sess.face_i} of {sess.faces_count}')
         # pop the next face from the queue
-        current_face = sess['faces_detected'].popleft()
+        current_face = sess['faces_detected'][0]
         sess.img_path, sess.face_location, sess.encoding, sess.match = current_face
 
         img = cv2.imread(sess.img_path)
@@ -153,9 +150,12 @@ if 'faces_detected' in sess:
                         st.image(img, width=100)
                         if sess.match:
                             st.write(f'I think this face belongs to **{predicted_name}**, can you confirm?')
-                            selected_name = st.selectbox(label=('Select "Not a face" to skip this face. '
+                            selected_name = st.selectbox(label=('The predicted name has been pre-selected, '
+                                                                'click the submit button to confirm.\n\n'
+                                                                'Select "Not a face" to skip this face.\n\n'
                                                                 'Select "Someone else" if their name '
-                                                                'is not in the list.'),
+                                                                'is not in the list.\n'
+                                                                ),
                                                          options=['Not a face', 'Someone else'] + sorted(
                                                              sess.name_options.keys()),
                                                          index=sorted(sess.name_options.keys()).index(
@@ -175,8 +175,9 @@ if 'faces_detected' in sess:
                     st.image(img, width=100)
                     st.write(f"This face belongs to **{predicted_name}**")
                     sess['selected_name'] = predicted_name
-                    record_name()
+                    # wait for a moment, user can still interrupt by unchecking auto confirm matches
                     time.sleep(1)
+                    record_name()
                     st.rerun()
 
             else:
