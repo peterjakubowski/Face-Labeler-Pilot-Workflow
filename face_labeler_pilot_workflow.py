@@ -114,6 +114,12 @@ if detect_faces:
 if 'faces_detected' in sess:
     # check if there are faces in our queue
     if sess['faces_detected']:
+        # ask the user if the workflow should automatically confirm/accept matches
+        auto_confirm_matches = st.checkbox(label="Auto confirm matches?",
+                                           value=False,
+                                           key='auto_confirm_matches',
+                                           on_change=record_name
+                                           )
         status_bar = st.progress(sess.face_i / sess.faces_count,
                                  text=f'Labeling face {sess.face_i} of {sess.faces_count}')
         # pop the next face from the queue
@@ -142,27 +148,36 @@ if 'faces_detected' in sess:
                     count[name] = count.get(name, 0) + 1
                 predicted_name = max(count, key=count.get)
                 # st.write(list(sess.name_options.keys()))
-                with st.form(str(uuid.uuid4())):
+                if not auto_confirm_matches:
+                    with st.form(str(uuid.uuid4())):
+                        st.image(img, width=100)
+                        if sess.match:
+                            st.write(f'I think this face belongs to **{predicted_name}**, can you confirm?')
+                            selected_name = st.selectbox(label=('Select "Not a face" to skip this face. '
+                                                                'Select "Someone else" if their name '
+                                                                'is not in the list.'),
+                                                         options=['Not a face', 'Someone else'] + sorted(
+                                                             sess.name_options.keys()),
+                                                         index=sorted(sess.name_options.keys()).index(
+                                                             predicted_name) + 2,
+                                                         key='selected_name')
+                        elif not sess.match:
+                            st.write((f"I think this face belongs to **{predicted_name}**, "
+                                      "but you think it's someone else, who do you think this is?"))
+                            selected_name = st_free_text_select(label=('Who do you think this is? Type in a new name '
+                                                                       'or select one from the list. '
+                                                                       'Select "Not a face" to skip this face.'),
+                                                                options=sorted(sess.name_options.keys()),
+                                                                key="selected_name"
+                                                                )
+                        st.form_submit_button(label='Submit', on_click=record_name)
+                elif auto_confirm_matches:
                     st.image(img, width=100)
-                    if sess.match:
-                        st.write(f'I think this face belongs to **{predicted_name}**, can you confirm?')
-                        selected_name = st.selectbox(label=('Select "Not a face" to skip this face. '
-                                                            'Select "Someone else" if their name is not in the list.'),
-                                                     options=['Not a face', 'Someone else'] + sorted(
-                                                         sess.name_options.keys()),
-                                                     index=sorted(sess.name_options.keys()).index(
-                                                         predicted_name) + 2,
-                                                     key='selected_name')
-                    elif not sess.match:
-                        st.write((f"I think this face belongs to **{predicted_name}**, "
-                                  "but you think it's someone else, who do you think this is?"))
-                        selected_name = st_free_text_select(label=('Who do you think this is? '
-                                                                   'Type in a new name or select one from the list. '
-                                                                   'Select "Not a face" to skip this face.'),
-                                                            options=sorted(sess.name_options.keys()),
-                                                            key="selected_name"
-                                                            )
-                    st.form_submit_button(label='Submit', on_click=record_name)
+                    st.write(f"This face belongs to **{predicted_name}**")
+                    sess['selected_name'] = predicted_name
+                    record_name()
+                    time.sleep(1)
+                    st.rerun()
 
             else:
                 with st.form(str(uuid.uuid4())):
