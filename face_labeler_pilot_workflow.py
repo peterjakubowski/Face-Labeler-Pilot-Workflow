@@ -154,7 +154,8 @@ if 'faces_detected' in sess:
                         if sess.match:
                             st.write(f'I think this face belongs to **{predicted_name}**, can you confirm?')
                             selected_name = st.selectbox(label=('Select "Not a face" to skip this face. '
-                                                                'Select "Someone else" if their name is not in the list.'),
+                                                                'Select "Someone else" if their name '
+                                                                'is not in the list.'),
                                                          options=['Not a face', 'Someone else'] + sorted(
                                                              sess.name_options.keys()),
                                                          index=sorted(sess.name_options.keys()).index(
@@ -163,8 +164,8 @@ if 'faces_detected' in sess:
                         elif not sess.match:
                             st.write((f"I think this face belongs to **{predicted_name}**, "
                                       "but you think it's someone else, who do you think this is?"))
-                            selected_name = st_free_text_select(label=('Who do you think this is? '
-                                                                       'Type in a new name or select one from the list. '
+                            selected_name = st_free_text_select(label=('Who do you think this is? Type in a new name '
+                                                                       'or select one from the list. '
                                                                        'Select "Not a face" to skip this face.'),
                                                                 options=sorted(sess.name_options.keys()),
                                                                 key="selected_name"
@@ -172,7 +173,7 @@ if 'faces_detected' in sess:
                         st.form_submit_button(label='Submit', on_click=record_name)
                 elif auto_confirm_matches:
                     st.image(img, width=100)
-                    st.write(f"This is **{predicted_name}**.")
+                    st.write(f"This face belongs to **{predicted_name}**")
                     sess['selected_name'] = predicted_name
                     record_name()
                     time.sleep(1)
