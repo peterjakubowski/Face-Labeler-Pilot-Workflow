@@ -97,8 +97,8 @@ select_folder = st.selectbox(label='Choose a folder of images to scan for faces'
 
 detect_faces = st.button(label="Detect Faces")
 
-if detect_faces:
-    image_paths = list(paths.list_images(IMG_DIR + "/" + select_folder))
+if detect_faces and select_folder:
+    image_paths = list(paths.list_images(os.path.join(IMG_DIR, select_folder)))
     sess['faces_detected'] = strip_faces(image_paths)
     sess['faces_count'] = len(sess.faces_detected)
     sess['face_i'] = 1
@@ -202,7 +202,7 @@ if 'faces_detected' in sess:
                                                     key="selected_name"
                                                     )
                 st.form_submit_button(label='Continue', on_click=record_name)
-    # if our queue of faces is empty, check if we have labeled any watch_folder
+    # if our queue of faces is empty, check if we have labeled any images
     else:
         success_text = "All faces have been labeled!"
         st.success(success_text, icon='✅')
