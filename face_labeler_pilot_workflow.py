@@ -14,6 +14,27 @@ from collections import deque
 import textwrap
 
 
+class Face:
+    # structure to store information about detected faces
+    def __init__(self):
+        self.img_path = ""
+        self.img_height = 0
+        self.img_width = 0
+        self.face_top = 0
+        self.face_right = 0
+        self.face_bottom = 0
+        self.face_left = 0
+        self.encoding = []
+        self.match_candidate = True
+
+    def face_location(self):
+        return tuple([self.face_top, self.face_right, self.face_bottom, self.face_left])
+
+    def current_face(self):
+        # print(self.img_path, self.face_location(), self.encoding, self.match_candidate)
+        return self.img_path, self.face_location(), self.encoding, self.match_candidate
+
+
 # @ st.cache_data(show_spinner=False)
 def strip_faces(img_paths):
     # initialize status bar
@@ -44,8 +65,13 @@ def strip_faces(img_paths):
                                                         known_face_locations=[face_location],
                                                         num_jitters=1,
                                                         model="large")
+            face = Face()
+            face.img_path = img_paths[i]
+            face.face_top, face.face_right, face.face_bottom, face.face_left = [d * 4 for d in face_location]
+            face.encoding = encodings
+
             # update the queue
-            q.append((img_paths[i], (_top * 4, _right * 4, _bottom * 4, _left * 4), encodings, True))
+            q.append(face)
 
     _status_bar.empty()
 
@@ -55,26 +81,21 @@ def strip_faces(img_paths):
 def record_name():
     if sess.selected_name:
         if sess.selected_name == 'Someone else':
-            sess['faces_detected'].popleft()
-            sess['faces_detected'].appendleft((sess.img_path,
-                                               sess.face_location,
-                                               sess.encoding,
-                                               False)
-                                              )
-        elif sess.selected_name != 'Not a face':
-            sess['faces_detected'].popleft()
-            sess.name_options[sess.selected_name] += 1
-            sess.face_i += 1
-            if sess.img_path not in sess.labeled:
-                sess.labeled[sess.img_path] = {'face_locations': [], 'person_shown': []}
-            sess.labeled[sess.img_path]['face_locations'].append(sess.face_location)
-            sess.labeled[sess.img_path]['person_shown'].append(sess.selected_name)
-            if len(sess.encoding) > 0:
-                sess.data['encodings'].append(sess.encoding[0])
-                sess.data['names'].append(sess.selected_name)
+            sess['faces_detected'][0].match_candidate = False
         else:
+            if sess.selected_name == 'Not a face':
+                sess.faces_count -= 1
+            else:
+                sess.name_options[sess.selected_name] += 1
+                sess.face_i += 1
+                if sess['faces_detected'][0].img_path not in sess.labeled:
+                    sess.labeled[sess['faces_detected'][0].img_path] = {'face_locations': [], 'person_shown': []}
+                sess.labeled[sess['faces_detected'][0].img_path]['face_locations'].append(sess['faces_detected'][0].face_location())
+                sess.labeled[sess['faces_detected'][0].img_path]['person_shown'].append(sess.selected_name)
+                if len(sess['faces_detected'][0].encoding) > 0:
+                    sess.data['encodings'].append(sess['faces_detected'][0].encoding[0])
+                    sess.data['names'].append(sess.selected_name)
             sess['faces_detected'].popleft()
-            sess.faces_count -= 1
 
     return
 
@@ -96,12 +117,19 @@ select_folder = st.selectbox(label='Choose a folder of images to scan for faces'
 detect_faces = st.button(label="Detect Faces")
 
 if detect_faces and select_folder:
+    # list all the images in the selected folder
     image_paths = list(paths.list_images(os.path.join(IMG_DIR, select_folder)))
+    # detect faces in all the images, get a list/queue of faces (instances of Face class)
     sess['faces_detected'] = strip_faces(image_paths)
+    # count how many faces were detected
     sess['faces_count'] = len(sess.faces_detected)
+    # count of faces labeled
     sess['face_i'] = 1
+    # dictionary of labeled faces
     sess['labeled'] = {}
+    # dictionary of face encodings and names
     sess['data'] = {'encodings': [], 'names': []}
+    # dictionary of names/identities and counts
     sess['name_options'] = defaultdict(int)
     success_text = (f"Face detection is complete! "
                     f"Found {len(sess.faces_detected)} faces "
@@ -121,7 +149,8 @@ if 'faces_detected' in sess:
                                  text=f'Labeling face {sess.face_i} of {sess.faces_count}')
         # pop the next face from the queue
         current_face = sess['faces_detected'][0]
-        sess.img_path, sess.face_location, sess.encoding, sess.match = current_face
+        # print(current_face.current_face())
+        sess.img_path, sess.face_location, sess.encoding, sess.match = current_face.current_face()
 
         img = cv2.imread(sess.img_path)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -182,7 +211,6 @@ if 'faces_detected' in sess:
 
             else:
                 with st.form(str(uuid.uuid4())):
-                    # st.write(sess.img_path)
                     st.image(img, width=100)
                     st.write("I don't recognize this face, who is this?")
                     selected_name = st_free_text_select(label=('Type in a new name or select one from the list. '
@@ -213,7 +241,7 @@ if 'faces_detected' in sess:
         st.dataframe(df.sort_index())
         # if we have labeled data, let's embed the face locations and names in the image metadata
         if 'labeled' in sess:
-            # st.write(sess.labeled)
+            st.write(sess.labeled)
             # st.write(sess.data)
             write_metadata = st.button(label="Write Metadata")
             if write_metadata:
