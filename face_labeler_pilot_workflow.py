@@ -26,13 +26,21 @@ class Face:
         self.face_left = 0
         self.encoding = []
         self.match_candidate = True
+        self.person_in_image = ""
 
     def face_location(self):
         return tuple([self.face_top, self.face_right, self.face_bottom, self.face_left])
 
     def current_face(self):
-        # print(self.img_path, self.face_location(), self.encoding, self.match_candidate)
         return self.img_path, self.face_location(), self.encoding, self.match_candidate
+
+    def open_image(self):
+        img = cv2.imread(self.img_path)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        return img
+
+    def resize_image(self, max_dim):
+        pass
 
 
 # @ st.cache_data(show_spinner=False)
