@@ -238,56 +238,61 @@ if 'faces_detected' in sess:
                 st.form_submit_button(label='Continue', on_click=record_name)
     # if our queue of faces is empty, check if we have labeled any images
     if not sess['faces_detected']:
-        success_text = "All faces have been labeled!"
-        st.success(success_text, icon='✅')
-        df = pd.DataFrame(data=sess.name_options.items(),
-                          columns=['names', 'counts'])
-        df.set_index('names', inplace=True)
-        st.dataframe(df.sort_index())
         # if we have labeled data, let's embed the face locations and names in the image metadata
         if 'labeled' in sess:
-            write_metadata = st.button(label="Write Metadata")
-            if write_metadata:
-                status_text = 'Begin writing metadata to files!'
-                status_bar = st.progress(0, status_text)
-                n = len(sess.labeled)
-                j = 0
-                for image_path, faces in sess.labeled.items():
-                    status_bar.progress((j + 1) / n,
-                                        text=f'({j + 1} of {n}) Writing metadata to {image_path.split("/")[-1]}...')
-                    for i, face in enumerate(faces):
-                        # use exiftool to save metadata to files
-                        with exiftool.ExifToolHelper() as et:
-                            tags = et.get_tags(files=image_path,
-                                               tags=["XMP:RegionName", "XMP:RegionType", "XMP:PersonInImage"])[0]
-                            # st.write(tags)
-                            if "XMP:PersonInImage" not in tags:
-                                # st.write(f'Setting PersonInImage to {person_shown}')
-                                et.execute(f"-XMP:PersonInImage={face.person_shown}", image_path)
-                            elif face.person_shown not in tags["XMP:PersonInImage"]:
-                                # st.write(f'Appending {person_shown} to PersonInImage')
-                                et.execute(f"-XMP:PersonInImage+={face.person_shown}", image_path)
-                            W, H, X, Y = face.normalize_region()
-                            if "XMP:RegionName" not in tags:
-                                # st.write(f'Setting RegionName to {person_shown}')
-                                execution_string = str("-XMP-mwg-rs:RegionInfo={AppliedToDimensions={"
-                                                       f"W={face.img_width}, H={face.img_height}, "
-                                                       "Unit=pixel}, RegionList=[{Area={"
-                                                       f"W={W}, H={H}, X={X}, Y={Y},"
-                                                       "Unit=normalized}, "
-                                                       f"Name={face.person_shown},"
-                                                       "Type=Face}]}")
-                                print(execution_string)
-                                et.execute(execution_string, image_path)
-                            elif face.person_shown not in tags["XMP:RegionName"]:
-                                # st.write(f'Appending {person_shown} to RegionName')
-                                execution_string = str("-XMP-mwg-rs:RegionList+=[{Area={"
-                                                       f"W={W}, H={H}, X={X}, Y={Y},"
-                                                       "Unit=normalized}, "
-                                                       f"Name={face.person_shown},"
-                                                       "Type=Face}]}")
-                                print(execution_string)
-                                et.execute(execution_string, image_path)
-                    j += 1
-                status_bar.empty()
-                st.success("Metadata saved to files! Workflow complete!", icon='✅')
+            if not sess['labeled']:
+                st.success(f'{len(sess.labeled)} faces were labeled. Workflow complete!',
+                           icon='✅')
+            elif sess['labeled']:
+                success_text = "All faces have been labeled!"
+                st.success(success_text, icon='✅')
+                df = pd.DataFrame(data=sess.name_options.items(),
+                                  columns=['names', 'counts'])
+                df.set_index('names', inplace=True)
+                st.dataframe(df.sort_index())
+                write_metadata = st.button(label="Write Metadata")
+                if write_metadata:
+                    status_text = 'Begin writing metadata to files!'
+                    status_bar = st.progress(0, status_text)
+                    time.sleep(1)
+                    n = len(sess.labeled)
+                    j = 0
+                    for image_path, faces in sess.labeled.items():
+                        status_bar.progress((j + 1) / n,
+                                            text=f'({j + 1} of {n}) Writing metadata to {image_path.split("/")[-1]}...')
+                        for i, face in enumerate(faces):
+                            # use exiftool to save metadata to files
+                            with exiftool.ExifToolHelper() as et:
+                                tags = et.get_tags(files=image_path,
+                                                   tags=["XMP:RegionName", "XMP:RegionType", "XMP:PersonInImage"])[0]
+                                # st.write(tags)
+                                if "XMP:PersonInImage" not in tags:
+                                    # st.write(f'Setting PersonInImage to {person_shown}')
+                                    et.execute(f"-XMP:PersonInImage={face.person_shown}", image_path)
+                                elif face.person_shown not in tags["XMP:PersonInImage"]:
+                                    # st.write(f'Appending {person_shown} to PersonInImage')
+                                    et.execute(f"-XMP:PersonInImage+={face.person_shown}", image_path)
+                                W, H, X, Y = face.normalize_region()
+                                if "XMP:RegionName" not in tags:
+                                    # st.write(f'Setting RegionName to {person_shown}')
+                                    execution_string = str("-XMP-mwg-rs:RegionInfo={AppliedToDimensions={"
+                                                           f"W={face.img_width}, H={face.img_height}, "
+                                                           "Unit=pixel}, RegionList=[{Area={"
+                                                           f"W={W}, H={H}, X={X}, Y={Y},"
+                                                           "Unit=normalized}, "
+                                                           f"Name={face.person_shown},"
+                                                           "Type=Face}]}")
+                                    print(execution_string)
+                                    et.execute(execution_string, image_path)
+                                elif face.person_shown not in tags["XMP:RegionName"]:
+                                    # st.write(f'Appending {person_shown} to RegionName')
+                                    execution_string = str("-XMP-mwg-rs:RegionList+=[{Area={"
+                                                           f"W={W}, H={H}, X={X}, Y={Y},"
+                                                           "Unit=normalized}, "
+                                                           f"Name={face.person_shown},"
+                                                           "Type=Face}]}")
+                                    print(execution_string)
+                                    et.execute(execution_string, image_path)
+                        j += 1
+                    status_bar.empty()
+                    st.success("Metadata saved to files! Workflow complete!", icon='✅')
