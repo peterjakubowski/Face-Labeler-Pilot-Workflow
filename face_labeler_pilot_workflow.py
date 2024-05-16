@@ -135,14 +135,14 @@ if not folder_names:
 select_folder = st.selectbox(label='Choose a folder of images to scan for faces',
                              index=None,
                              options=folder_names)
-
+# Streamlit button widget, kicks off the face detection workflow when pressed
 detect_faces = st.button(label="Detect Faces")
 
 if detect_faces and select_folder:
     # list all the images in the selected folder
-    image_paths = list(paths.list_images(os.path.join(IMG_DIR, select_folder)))
+    sess['image_paths'] = list(paths.list_images(os.path.join(IMG_DIR, select_folder)))
     # detect faces in all the images, get a list/queue of faces (instances of Face class)
-    sess['faces_detected'] = strip_faces(image_paths)
+    sess['faces_detected'] = strip_faces(sess.image_paths)
     # count how many faces were detected
     sess['faces_count'] = len(sess.faces_detected)
     # count of faces labeled
@@ -153,9 +153,11 @@ if detect_faces and select_folder:
     sess['data'] = {'encodings': [], 'names': []}
     # dictionary of names/identities and counts
     sess['name_options'] = defaultdict(int)
+
+if 'faces_detected' in sess:
     success_text = (f"Face detection is complete! "
-                    f"Found {len(sess.faces_detected)} faces "
-                    f"in {len(image_paths)} images."
+                    f"Found {sess.faces_count} faces "
+                    f"in {len(sess.image_paths)} images."
                     )
     st.success(success_text, icon='✅')
 
