@@ -160,15 +160,12 @@ if 'faces_detected' in sess:
                     f"in {len(sess.image_paths)} images."
                     )
     st.success(success_text, icon='✅')
-
-if 'faces_detected' in sess:
     # check if there are faces in our queue
     if sess['faces_detected']:
         # ask the user if the workflow should automatically confirm/accept matches
         auto_confirm_matches = st.checkbox(label="Auto confirm matches?",
                                            value=False,
-                                           key='auto_confirm_matches'
-                                           )
+                                           key='auto_confirm_matches')
         status_bar = st.progress(sess.face_i / sess.faces_count,
                                  text=f'Labeling face {sess.face_i} of {sess.faces_count}')
         # pop the next face from the queue
@@ -182,7 +179,6 @@ if 'faces_detected' in sess:
             matches = face_recognition.compare_faces(sess.data['encodings'],
                                                      current_face.encoding[0],
                                                      tolerance=0.55)
-            # st.write(matches)
 
             if True in matches:
                 matched_indices = [i for (i, b) in enumerate(matches) if b]
@@ -191,7 +187,6 @@ if 'faces_detected' in sess:
                     name = sess.data['names'][i]
                     count[name] = count.get(name, 0) + 1
                 predicted_name = max(count, key=count.get)
-                # st.write(list(sess.name_options.keys()))
                 if not auto_confirm_matches:
                     with st.form(str(uuid.uuid4())):
                         st.image(current_face_img, width=100)
@@ -201,8 +196,7 @@ if 'faces_detected' in sess:
                                                 'click the submit button to confirm.\n\n'
                                                 'Select "Not a face" to skip this face.\n\n'
                                                 'Select "Someone else" if their name '
-                                                'is not in the list.\n'
-                                                ),
+                                                'is not in the list.\n'),
                                          options=['Not a face', 'Someone else'] + sorted(sess.name_options.keys()),
                                          index=sorted(sess.name_options.keys()).index(predicted_name) + 2,
                                          key='selected_name')
@@ -213,8 +207,7 @@ if 'faces_detected' in sess:
                                                        'or select one from the list. '
                                                        'Select "Not a face" to skip this face.'),
                                                 options=sorted(sess.name_options.keys()),
-                                                key="selected_name"
-                                                )
+                                                key="selected_name")
                         st.form_submit_button(label='Submit', on_click=record_name)
                 elif auto_confirm_matches:
                     st.image(current_face_img, width=100)
@@ -232,8 +225,7 @@ if 'faces_detected' in sess:
                     st_free_text_select(label=('Type in a new name or select one from the list. '
                                                'Select "Not a face" to skip this face.'),
                                         options=['Not a face'] + sorted(sess.name_options.keys()),
-                                        key="selected_name"
-                                        )
+                                        key="selected_name")
                     st.form_submit_button(label='Submit', on_click=record_name)
         elif not current_face.encoding:
             with st.form(str(uuid.uuid4())):
@@ -242,8 +234,7 @@ if 'faces_detected' in sess:
                 st_free_text_select(label=('Type in a new name or select one from the list. '
                                            'Select "Not a face" to skip this face.'),
                                     options=['Not a face'] + sorted(sess.name_options.keys()),
-                                    key="selected_name"
-                                    )
+                                    key="selected_name")
                 st.form_submit_button(label='Continue', on_click=record_name)
     # if our queue of faces is empty, check if we have labeled any images
     if not sess['faces_detected']:
