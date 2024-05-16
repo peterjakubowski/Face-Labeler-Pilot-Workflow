@@ -271,7 +271,7 @@ if 'faces_detected' in sess:
                             if "XMP:RegionName" not in tags:
                                 # st.write(f'Setting RegionName to {person_shown}')
                                 execution_string = str("-XMP-mwg-rs:RegionInfo={AppliedToDimensions={"
-                                                       f"W={img_w}, H={img_h}, "
+                                                       f"W={face.img_width}, H={face.img_height}, "
                                                        "Unit=pixel}, RegionList=[{Area={"
                                                        f"W={W}, H={H}, X={X}, Y={Y},"
                                                        "Unit=normalized}, "
