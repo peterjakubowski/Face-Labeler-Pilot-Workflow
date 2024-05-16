@@ -32,10 +32,21 @@ class Face:
     def open_image(self):
         img = cv2.imread(self.img_path)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        top, right, bottom, left = self.face_location
+        img = img[top:bottom, left:right]
         return img
 
     def resize_image(self, max_dim):
         pass
+
+    def normalize_region(self):
+        top, right, bottom, left = self.face_location
+        img_h, img_w = self.img_height, self.img_width
+        _W = round((right - left) / img_h, 4)
+        _H = round((bottom - top) / img_w, 4)
+        _X = round(left / img_h, 4)
+        _Y = round(top / img_w, 4)
+        return _W, _H, _X, _Y
 
 
 # @ st.cache_data(show_spinner=False)
@@ -154,10 +165,7 @@ if 'faces_detected' in sess:
         # pop the next face from the queue
         current_face = sess['faces_detected'][0]
         # open cropped image of current face
-        current_face_img = cv2.imread(current_face.img_path)
-        current_face_img = cv2.cvtColor(current_face_img, cv2.COLOR_BGR2RGB)
-        top, right, bottom, left = current_face.face_location
-        current_face_img = current_face_img[top:bottom, left:right]
+        current_face_img = current_face.open_image()
         # check if the current face has an encoding
         if len(current_face.encoding) > 0:
             # compare the face encoding to existing encodings to see if we can find a match
@@ -248,12 +256,7 @@ if 'faces_detected' in sess:
                     status_bar.progress((j + 1) / n,
                                         text=f'({j + 1} of {n}) Writing metadata to {image_path.split("/")[-1]}...')
                     for i, face in enumerate(faces):
-                        top, right, bottom, left = face.face_location
-                        img_h, img_w = face.img_height, face.img_width
-                        W = round((right - left) / img_h, 4)
-                        H = round((bottom - top) / img_w, 4)
-                        X = round(left / img_h, 4)
-                        Y = round(top / img_w, 4)
+                        # use exiftool to save metadata to files
                         with exiftool.ExifToolHelper() as et:
                             tags = et.get_tags(files=image_path,
                                                tags=["XMP:RegionName", "XMP:RegionType", "XMP:PersonInImage"])[0]
@@ -264,7 +267,7 @@ if 'faces_detected' in sess:
                             elif face.person_shown not in tags["XMP:PersonInImage"]:
                                 # st.write(f'Appending {person_shown} to PersonInImage')
                                 et.execute(f"-XMP:PersonInImage+={face.person_shown}", image_path)
-
+                            W, H, X, Y = face.normalize_region()
                             if "XMP:RegionName" not in tags:
                                 # st.write(f'Setting RegionName to {person_shown}')
                                 execution_string = str("-XMP-mwg-rs:RegionInfo={AppliedToDimensions={"
