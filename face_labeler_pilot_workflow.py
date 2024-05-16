@@ -7,6 +7,7 @@ import face_recognition
 import cv2
 import exiftool
 import os
+from pathlib import Path
 import uuid
 import time
 from collections import defaultdict
@@ -54,8 +55,7 @@ def strip_faces(img_paths):
     # initialize status bar
     _status_bar = st.progress(0, 'Firing up the face detection algorithm!')
     time.sleep(1)
-    # keep a queue of found faces
-    # queue is a list of instances of class Face
+    # keep a queue of found faces, the queue is a list of instances of class Face
     q = deque()
     # iterate over all image paths is the selected directory and gather all detected faces and face encodings
     for i in range(len(img_paths)):
@@ -122,20 +122,27 @@ st.text(textwrap.dedent('''
 3) Embed names and face locations in the image's metadata
 '''))
 
-IMG_DIR = "watch_folder"
-
+# Set the path to the 'watch_folder' directory
+IMG_DIR = Path("watch_folder")
+# Make the 'watch_folder' directory if it does not exist
+Path.mkdir(IMG_DIR, exist_ok=True)
+# List the subfolders of the 'watch_folder'
 folder_names = [d for d in os.listdir(IMG_DIR) if os.path.isdir(os.path.join(IMG_DIR, d))]
-
+# Display a warning if there are no subfolders in the 'watch_folder'
+if not folder_names:
+    st.warning("The watch folder is empty. Add a folder of images to the watch folder to begin.")
+# Streamlit selectbox widget, gives the user a way to select a folder of images
 select_folder = st.selectbox(label='Choose a folder of images to scan for faces',
+                             index=None,
                              options=folder_names)
-
+# Streamlit button widget, kicks off the face detection workflow when pressed
 detect_faces = st.button(label="Detect Faces")
 
 if detect_faces and select_folder:
     # list all the images in the selected folder
-    image_paths = list(paths.list_images(os.path.join(IMG_DIR, select_folder)))
+    sess['image_paths'] = list(paths.list_images(os.path.join(IMG_DIR, select_folder)))
     # detect faces in all the images, get a list/queue of faces (instances of Face class)
-    sess['faces_detected'] = strip_faces(image_paths)
+    sess['faces_detected'] = strip_faces(sess.image_paths)
     # count how many faces were detected
     sess['faces_count'] = len(sess.faces_detected)
     # count of faces labeled
@@ -146,20 +153,19 @@ if detect_faces and select_folder:
     sess['data'] = {'encodings': [], 'names': []}
     # dictionary of names/identities and counts
     sess['name_options'] = defaultdict(int)
-    success_text = (f"Face detection is complete! "
-                    f"Found {len(sess.faces_detected)} faces "
-                    f"in {len(image_paths)} images."
-                    )
-    st.success(success_text, icon='✅')
 
 if 'faces_detected' in sess:
+    success_text = (f"Face detection is complete! "
+                    f"Found {sess.faces_count} faces "
+                    f"in {len(sess.image_paths)} images."
+                    )
+    st.success(success_text, icon='✅')
     # check if there are faces in our queue
     if sess['faces_detected']:
         # ask the user if the workflow should automatically confirm/accept matches
         auto_confirm_matches = st.checkbox(label="Auto confirm matches?",
                                            value=False,
-                                           key='auto_confirm_matches'
-                                           )
+                                           key='auto_confirm_matches')
         status_bar = st.progress(sess.face_i / sess.faces_count,
                                  text=f'Labeling face {sess.face_i} of {sess.faces_count}')
         # pop the next face from the queue
@@ -173,7 +179,6 @@ if 'faces_detected' in sess:
             matches = face_recognition.compare_faces(sess.data['encodings'],
                                                      current_face.encoding[0],
                                                      tolerance=0.55)
-            # st.write(matches)
 
             if True in matches:
                 matched_indices = [i for (i, b) in enumerate(matches) if b]
@@ -182,7 +187,6 @@ if 'faces_detected' in sess:
                     name = sess.data['names'][i]
                     count[name] = count.get(name, 0) + 1
                 predicted_name = max(count, key=count.get)
-                # st.write(list(sess.name_options.keys()))
                 if not auto_confirm_matches:
                     with st.form(str(uuid.uuid4())):
                         st.image(current_face_img, width=100)
@@ -192,8 +196,7 @@ if 'faces_detected' in sess:
                                                 'click the submit button to confirm.\n\n'
                                                 'Select "Not a face" to skip this face.\n\n'
                                                 'Select "Someone else" if their name '
-                                                'is not in the list.\n'
-                                                ),
+                                                'is not in the list.\n'),
                                          options=['Not a face', 'Someone else'] + sorted(sess.name_options.keys()),
                                          index=sorted(sess.name_options.keys()).index(predicted_name) + 2,
                                          key='selected_name')
@@ -204,8 +207,7 @@ if 'faces_detected' in sess:
                                                        'or select one from the list. '
                                                        'Select "Not a face" to skip this face.'),
                                                 options=sorted(sess.name_options.keys()),
-                                                key="selected_name"
-                                                )
+                                                key="selected_name")
                         st.form_submit_button(label='Submit', on_click=record_name)
                 elif auto_confirm_matches:
                     st.image(current_face_img, width=100)
@@ -223,8 +225,7 @@ if 'faces_detected' in sess:
                     st_free_text_select(label=('Type in a new name or select one from the list. '
                                                'Select "Not a face" to skip this face.'),
                                         options=['Not a face'] + sorted(sess.name_options.keys()),
-                                        key="selected_name"
-                                        )
+                                        key="selected_name")
                     st.form_submit_button(label='Submit', on_click=record_name)
         elif not current_face.encoding:
             with st.form(str(uuid.uuid4())):
@@ -233,61 +234,65 @@ if 'faces_detected' in sess:
                 st_free_text_select(label=('Type in a new name or select one from the list. '
                                            'Select "Not a face" to skip this face.'),
                                     options=['Not a face'] + sorted(sess.name_options.keys()),
-                                    key="selected_name"
-                                    )
+                                    key="selected_name")
                 st.form_submit_button(label='Continue', on_click=record_name)
     # if our queue of faces is empty, check if we have labeled any images
     if not sess['faces_detected']:
-        success_text = "All faces have been labeled!"
-        st.success(success_text, icon='✅')
-        df = pd.DataFrame(data=sess.name_options.items(),
-                          columns=['names', 'counts'])
-        df.set_index('names', inplace=True)
-        st.dataframe(df.sort_index())
         # if we have labeled data, let's embed the face locations and names in the image metadata
         if 'labeled' in sess:
-            write_metadata = st.button(label="Write Metadata")
-            if write_metadata:
-                status_text = 'Begin writing metadata to files!'
-                status_bar = st.progress(0, status_text)
-                n = len(sess.labeled)
-                j = 0
-                for image_path, faces in sess.labeled.items():
-                    status_bar.progress((j + 1) / n,
-                                        text=f'({j + 1} of {n}) Writing metadata to {image_path.split("/")[-1]}...')
-                    for i, face in enumerate(faces):
-                        # use exiftool to save metadata to files
-                        with exiftool.ExifToolHelper() as et:
-                            tags = et.get_tags(files=image_path,
-                                               tags=["XMP:RegionName", "XMP:RegionType", "XMP:PersonInImage"])[0]
-                            # st.write(tags)
-                            if "XMP:PersonInImage" not in tags:
-                                # st.write(f'Setting PersonInImage to {person_shown}')
-                                et.execute(f"-XMP:PersonInImage={face.person_shown}", image_path)
-                            elif face.person_shown not in tags["XMP:PersonInImage"]:
-                                # st.write(f'Appending {person_shown} to PersonInImage')
-                                et.execute(f"-XMP:PersonInImage+={face.person_shown}", image_path)
-                            W, H, X, Y = face.normalize_region()
-                            if "XMP:RegionName" not in tags:
-                                # st.write(f'Setting RegionName to {person_shown}')
-                                execution_string = str("-XMP-mwg-rs:RegionInfo={AppliedToDimensions={"
-                                                       f"W={face.img_width}, H={face.img_height}, "
-                                                       "Unit=pixel}, RegionList=[{Area={"
-                                                       f"W={W}, H={H}, X={X}, Y={Y},"
-                                                       "Unit=normalized}, "
-                                                       f"Name={face.person_shown},"
-                                                       "Type=Face}]}")
-                                print(execution_string)
-                                et.execute(execution_string, image_path)
-                            elif face.person_shown not in tags["XMP:RegionName"]:
-                                # st.write(f'Appending {person_shown} to RegionName')
-                                execution_string = str("-XMP-mwg-rs:RegionList+=[{Area={"
-                                                       f"W={W}, H={H}, X={X}, Y={Y},"
-                                                       "Unit=normalized}, "
-                                                       f"Name={face.person_shown},"
-                                                       "Type=Face}]}")
-                                print(execution_string)
-                                et.execute(execution_string, image_path)
-                    j += 1
-                status_bar.empty()
-                st.success("Metadata saved to files! Workflow complete!", icon='✅')
+            if not sess['labeled']:
+                st.success(f'{len(sess.labeled)} faces were labeled. Workflow complete!',
+                           icon='✅')
+            elif sess['labeled']:
+                success_text = "All faces have been labeled!"
+                st.success(success_text, icon='✅')
+                df = pd.DataFrame(data=sess.name_options.items(),
+                                  columns=['names', 'counts'])
+                df.set_index('names', inplace=True)
+                st.dataframe(df.sort_index())
+                write_metadata = st.button(label="Write Metadata")
+                if write_metadata:
+                    status_text = 'Begin writing metadata to files!'
+                    status_bar = st.progress(0, status_text)
+                    time.sleep(1)
+                    n = len(sess.labeled)
+                    j = 0
+                    for image_path, faces in sess.labeled.items():
+                        status_bar.progress((j + 1) / n,
+                                            text=f'({j + 1} of {n}) Writing metadata to {image_path.split("/")[-1]}...')
+                        for i, face in enumerate(faces):
+                            # use exiftool to save metadata to files
+                            with exiftool.ExifToolHelper() as et:
+                                tags = et.get_tags(files=image_path,
+                                                   tags=["XMP:RegionName", "XMP:RegionType", "XMP:PersonInImage"])[0]
+                                # st.write(tags)
+                                if "XMP:PersonInImage" not in tags:
+                                    # st.write(f'Setting PersonInImage to {person_shown}')
+                                    et.execute(f"-XMP:PersonInImage={face.person_shown}", image_path)
+                                elif face.person_shown not in tags["XMP:PersonInImage"]:
+                                    # st.write(f'Appending {person_shown} to PersonInImage')
+                                    et.execute(f"-XMP:PersonInImage+={face.person_shown}", image_path)
+                                W, H, X, Y = face.normalize_region()
+                                if "XMP:RegionName" not in tags:
+                                    # st.write(f'Setting RegionName to {person_shown}')
+                                    execution_string = str("-XMP-mwg-rs:RegionInfo={AppliedToDimensions={"
+                                                           f"W={face.img_width}, H={face.img_height}, "
+                                                           "Unit=pixel}, RegionList=[{Area={"
+                                                           f"W={W}, H={H}, X={X}, Y={Y},"
+                                                           "Unit=normalized}, "
+                                                           f"Name={face.person_shown},"
+                                                           "Type=Face}]}")
+                                    print(execution_string)
+                                    et.execute(execution_string, image_path)
+                                elif face.person_shown not in tags["XMP:RegionName"]:
+                                    # st.write(f'Appending {person_shown} to RegionName')
+                                    execution_string = str("-XMP-mwg-rs:RegionList+=[{Area={"
+                                                           f"W={W}, H={H}, X={X}, Y={Y},"
+                                                           "Unit=normalized}, "
+                                                           f"Name={face.person_shown},"
+                                                           "Type=Face}]}")
+                                    print(execution_string)
+                                    et.execute(execution_string, image_path)
+                        j += 1
+                    status_bar.empty()
+                    st.success("Metadata saved to files! Workflow complete!", icon='✅')
