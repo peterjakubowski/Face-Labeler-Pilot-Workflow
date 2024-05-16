@@ -7,6 +7,7 @@ import face_recognition
 import cv2
 import exiftool
 import os
+from pathlib import Path
 import uuid
 import time
 from collections import defaultdict
@@ -54,8 +55,7 @@ def strip_faces(img_paths):
     # initialize status bar
     _status_bar = st.progress(0, 'Firing up the face detection algorithm!')
     time.sleep(1)
-    # keep a queue of found faces
-    # queue is a list of instances of class Face
+    # keep a queue of found faces, the queue is a list of instances of class Face
     q = deque()
     # iterate over all image paths is the selected directory and gather all detected faces and face encodings
     for i in range(len(img_paths)):
@@ -122,11 +122,18 @@ st.text(textwrap.dedent('''
 3) Embed names and face locations in the image's metadata
 '''))
 
-IMG_DIR = "watch_folder"
-
+# Set the path to the 'watch_folder' directory
+IMG_DIR = Path("watch_folder")
+# Make the 'watch_folder' directory if it does not exist
+Path.mkdir(IMG_DIR, exist_ok=True)
+# List the subfolders of the 'watch_folder'
 folder_names = [d for d in os.listdir(IMG_DIR) if os.path.isdir(os.path.join(IMG_DIR, d))]
-
+# Display a warning if there are no subfolders in the 'watch_folder'
+if not folder_names:
+    st.warning("The watch folder is empty. Add a folder of images to the watch folder to begin.")
+# Streamlit selectbox widget, gives the user a way to select a folder of images
 select_folder = st.selectbox(label='Choose a folder of images to scan for faces',
+                             index=None,
                              options=folder_names)
 
 detect_faces = st.button(label="Detect Faces")
