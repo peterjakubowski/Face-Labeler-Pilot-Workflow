@@ -113,14 +113,13 @@ def record_name():
             sess['faces_detected'].popleft()
 
     return
-
-
-st.header("Face Labeler Pilot", divider='rainbow')
-st.text(textwrap.dedent('''
-1) Detect faces in images
-2) Label detected faces
-3) Embed names and face locations in the image's metadata
-'''))
+# INFO: ===== Face Labeler Pilot Introduction ====
+st.title("Face Labeler Pilot")
+intro_text = ("Face Labeler Pilot is a 3-step post-production workflow tool "
+              "that uses face recognition to tag people shown in photographs.")
+st.markdown(intro_text)
+# INFO: ===== Begin Step 1: Detect Faces ====
+st.subheader("Step 1: Detect Faces", divider="gray")
 
 # Set the path to the 'watch_folder' directory
 IMG_DIR = Path("watch_folder")
@@ -160,6 +159,10 @@ if 'faces_detected' in sess:
                     f"in {len(sess.image_paths)} images."
                     )
     st.success(success_text, icon='✅')
+
+    # INFO: ===== Begin Step 2: Label Faces ====
+    st.subheader("Step 2: Label Faces", divider="gray")
+
     # check if there are faces in our queue
     if sess['faces_detected']:
         # ask the user if the workflow should automatically confirm/accept matches
@@ -250,7 +253,15 @@ if 'faces_detected' in sess:
                                   columns=['names', 'counts'])
                 df.set_index('names', inplace=True)
                 st.dataframe(df.sort_index())
-                write_metadata = st.button(label="Write Metadata")
+
+                # INFO: ===== Begin Step 3: Write/Save/Embed Metadata ====
+                st.subheader("Step 3: Save Metadata", divider="gray")
+                col1, col2, _, _ = st.columns(4)
+                with col1:
+                    write_metadata = st.button(label="Write Metadata")
+                with col2:
+                    export_metadata = st.button(label="Export Metadata")
+
                 if write_metadata:
                     status_text = 'Begin writing metadata to files!'
                     status_bar = st.progress(0, status_text)
