@@ -113,6 +113,8 @@ def record_name():
             sess['faces_detected'].popleft()
 
     return
+
+
 # INFO: ===== Face Labeler Pilot Introduction ====
 st.title("Face Labeler Pilot")
 intro_text = ("Face Labeler Pilot is a 3-step post-production workflow tool "
@@ -133,25 +135,29 @@ if not folder_names:
 # Streamlit selectbox widget, gives the user a way to select a folder of images
 select_folder = st.selectbox(label='Choose a folder of images to scan for faces',
                              index=None,
-                             options=folder_names)
-# Streamlit button widget, kicks off the face detection workflow when pressed
-detect_faces = st.button(label="Detect Faces")
+                             options=folder_names,
+                             placeholder='Choose a folder of images',
+                             label_visibility='collapsed'
+                             )
 
-if detect_faces and select_folder:
-    # list all the images in the selected folder
-    sess['image_paths'] = list(paths.list_images(os.path.join(IMG_DIR, select_folder)))
-    # detect faces in all the images, get a list/queue of faces (instances of Face class)
-    sess['faces_detected'] = strip_faces(sess.image_paths)
-    # count how many faces were detected
-    sess['faces_count'] = len(sess.faces_detected)
-    # count of faces labeled
-    sess['face_i'] = 1
-    # dictionary of labeled faces
-    sess['labeled'] = defaultdict(list)
-    # dictionary of face encodings and names
-    sess['data'] = {'encodings': [], 'names': []}
-    # dictionary of names/identities and counts
-    sess['name_options'] = defaultdict(int)
+if select_folder:
+    # Streamlit button widget, kicks off the face detection workflow when pressed
+    detect_faces = st.button(label="Detect Faces")
+    if detect_faces:
+        # list all the images in the selected folder
+        sess['image_paths'] = list(paths.list_images(os.path.join(IMG_DIR, select_folder)))
+        # detect faces in all the images, get a list/queue of faces (instances of Face class)
+        sess['faces_detected'] = strip_faces(sess.image_paths)
+        # count how many faces were detected
+        sess['faces_count'] = len(sess.faces_detected)
+        # count of faces labeled
+        sess['face_i'] = 1
+        # dictionary of labeled faces
+        sess['labeled'] = defaultdict(list)
+        # dictionary of face encodings and names
+        sess['data'] = {'encodings': [], 'names': []}
+        # dictionary of names/identities and counts
+        sess['name_options'] = defaultdict(int)
 
 if 'faces_detected' in sess:
     success_text = (f"Face detection is complete! "
