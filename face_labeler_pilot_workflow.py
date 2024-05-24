@@ -115,12 +115,13 @@ def record_name():
     return
 
 
-st.header("Face Labeler Pilot", divider='rainbow')
-st.text(textwrap.dedent('''
-1) Detect faces in images
-2) Label detected faces
-3) Embed names and face locations in the image's metadata
-'''))
+# INFO: ===== Face Labeler Pilot Introduction ====
+st.title("Face Labeler Pilot")
+intro_text = ("Face Labeler Pilot is a 3-step post-production workflow tool "
+              "that uses face recognition to tag people shown in photographs.")
+st.markdown(intro_text)
+# INFO: ===== Begin Step 1: Detect Faces ====
+st.subheader("Step 1: Detect Faces", divider="gray")
 
 # Set the path to the 'watch_folder' directory
 IMG_DIR = Path("watch_folder")
@@ -134,25 +135,29 @@ if not folder_names:
 # Streamlit selectbox widget, gives the user a way to select a folder of images
 select_folder = st.selectbox(label='Choose a folder of images to scan for faces',
                              index=None,
-                             options=folder_names)
-# Streamlit button widget, kicks off the face detection workflow when pressed
-detect_faces = st.button(label="Detect Faces")
+                             options=folder_names,
+                             placeholder='Choose a folder of images',
+                             label_visibility='collapsed'
+                             )
 
-if detect_faces and select_folder:
-    # list all the images in the selected folder
-    sess['image_paths'] = list(paths.list_images(os.path.join(IMG_DIR, select_folder)))
-    # detect faces in all the images, get a list/queue of faces (instances of Face class)
-    sess['faces_detected'] = strip_faces(sess.image_paths)
-    # count how many faces were detected
-    sess['faces_count'] = len(sess.faces_detected)
-    # count of faces labeled
-    sess['face_i'] = 1
-    # dictionary of labeled faces
-    sess['labeled'] = defaultdict(list)
-    # dictionary of face encodings and names
-    sess['data'] = {'encodings': [], 'names': []}
-    # dictionary of names/identities and counts
-    sess['name_options'] = defaultdict(int)
+if select_folder:
+    # Streamlit button widget, kicks off the face detection workflow when pressed
+    detect_faces = st.button(label="Detect Faces")
+    if detect_faces:
+        # list all the images in the selected folder
+        sess['image_paths'] = list(paths.list_images(os.path.join(IMG_DIR, select_folder)))
+        # detect faces in all the images, get a list/queue of faces (instances of Face class)
+        sess['faces_detected'] = strip_faces(sess.image_paths)
+        # count how many faces were detected
+        sess['faces_count'] = len(sess.faces_detected)
+        # count of faces labeled
+        sess['face_i'] = 1
+        # dictionary of labeled faces
+        sess['labeled'] = defaultdict(list)
+        # dictionary of face encodings and names
+        sess['data'] = {'encodings': [], 'names': []}
+        # dictionary of names/identities and counts
+        sess['name_options'] = defaultdict(int)
 
 if 'faces_detected' in sess:
     success_text = (f"Face detection is complete! "
@@ -160,6 +165,10 @@ if 'faces_detected' in sess:
                     f"in {len(sess.image_paths)} images."
                     )
     st.success(success_text, icon='✅')
+
+    # INFO: ===== Begin Step 2: Label Faces ====
+    st.subheader("Step 2: Label Faces", divider="gray")
+
     # check if there are faces in our queue
     if sess['faces_detected']:
         # ask the user if the workflow should automatically confirm/accept matches
@@ -250,7 +259,15 @@ if 'faces_detected' in sess:
                                   columns=['names', 'counts'])
                 df.set_index('names', inplace=True)
                 st.dataframe(df.sort_index())
-                write_metadata = st.button(label="Write Metadata")
+
+                # INFO: ===== Begin Step 3: Write/Save/Embed Metadata ====
+                st.subheader("Step 3: Save Metadata", divider="gray")
+                col1, col2, _, _ = st.columns(4)
+                with col1:
+                    write_metadata = st.button(label="Write Metadata")
+                with col2:
+                    export_metadata = st.button(label="Export Metadata")
+
                 if write_metadata:
                     status_text = 'Begin writing metadata to files!'
                     status_bar = st.progress(0, status_text)
