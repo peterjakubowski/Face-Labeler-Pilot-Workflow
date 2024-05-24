@@ -16,7 +16,9 @@ import textwrap
 
 
 class Face:
-    # structure to store information about detected faces
+    '''
+    structure to store information about detected faces
+    '''
     def __init__(self, img_path, img_height, img_width, face_location, encoding):
         self.img_path = img_path
         self.img_height = img_height
@@ -33,6 +35,9 @@ class Face:
     def open_image(self):
         img = cv2.imread(self.img_path)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        if max(img.shape[0], img.shape[1]) != max(self.img_width, self.img_height):
+            _w, _h = resize_image(image=img, size=max(self.img_width, self.img_height))
+            img = cv2.resize(img, dsize=(_w, _h), interpolation=cv2.INTER_AREA)
         top, right, bottom, left = self.face_location
         img = img[top:bottom, left:right]
         return img
@@ -48,6 +53,46 @@ class Face:
         _X = round(left / img_h, 4)
         _Y = round(top / img_w, 4)
         return _W, _H, _X, _Y
+
+
+def resize_image(image, size=1024):
+    '''
+    Function for rescaling the width and height
+    of an image to keep aspect ratio.
+    :param image: image (opened with cv2) to resize.
+    :param size: desired length of the longest edge in pixels.
+    :return: width (w) and height (h) of resized image.
+    '''
+
+    # get image width
+    width = image.shape[1]
+    # get image height
+    height = image.shape[0]
+    # check if the image is vertical,
+    # height is the longest edge
+    if height > width:
+        # set height to size
+        h = size
+        # determine the ratio for resizing
+        ratio = height / size
+        # calculate new width by dividing by ratio
+        w = int(width / ratio)
+    # check if the image is horizontal,
+    # width is the longest edge
+    elif height < width:
+        # set width to size
+        w = size
+        # determine the ratio for resizing
+        ratio = width / size
+        # calculate new height by dividing by ratio
+        h = int(height / ratio)
+    # if image is not vertical or horizontal,
+    # image must be square
+    else:
+        # set width and height to size
+        w = h = size
+    # return the new width and height
+    return w, h
 
 
 # @ st.cache_data(show_spinner=False)
@@ -67,7 +112,8 @@ def strip_faces(img_paths):
         # convert image color from BGR to RGB
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         # resize the image for fast inference
-        resized_image = cv2.resize(image, (0, 0), fx=0.25, fy=0.25)
+        _w, _h = resize_image(image=image, size=1024)
+        resized_image = cv2.resize(image, dsize=(_w, _h), interpolation=cv2.INTER_AREA)
         # detect face locations in image
         face_locations = face_recognition.face_locations(resized_image, model='hog')
         for face_location in face_locations:
@@ -78,9 +124,9 @@ def strip_faces(img_paths):
                                                         model="large")
             # update the queue with a new instance of class Face
             q.append(Face(img_path=img_paths[i],
-                          img_height = image.shape[0],
-                          img_width = image.shape[1],
-                          face_location=tuple([d * 4 for d in face_location]),
+                          img_height = resized_image.shape[0],
+                          img_width = resized_image.shape[1],
+                          face_location=tuple([d for d in face_location]),
                           encoding=encodings)
                      )
 
