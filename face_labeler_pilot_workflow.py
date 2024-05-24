@@ -12,13 +12,13 @@ import uuid
 import time
 from collections import defaultdict
 from collections import deque
-import textwrap
 
 
 class Face:
-    '''
+    """
     structure to store information about detected faces
-    '''
+    """
+
     def __init__(self, img_path, img_height, img_width, face_location, encoding):
         self.img_path = img_path
         self.img_height = img_height
@@ -56,13 +56,13 @@ class Face:
 
 
 def resize_image(image, size=1024):
-    '''
+    """
     Function for rescaling the width and height
     of an image to keep aspect ratio.
     :param image: image (opened with cv2) to resize.
     :param size: desired length of the longest edge in pixels.
     :return: width (w) and height (h) of resized image.
-    '''
+    """
 
     # get image width
     width = image.shape[1]
@@ -124,8 +124,8 @@ def strip_faces(img_paths):
                                                         model="large")
             # update the queue with a new instance of class Face
             q.append(Face(img_path=img_paths[i],
-                          img_height = resized_image.shape[0],
-                          img_width = resized_image.shape[1],
+                          img_height=resized_image.shape[0],
+                          img_width=resized_image.shape[1],
                           face_location=tuple([d for d in face_location]),
                           encoding=encodings)
                      )
@@ -141,8 +141,8 @@ def record_name():
         # if the user selected 'Someone else', that means the face recognition algorithm
         # predicted the name belonging to the face, but the user disagrees with the prediction
         # and wants to correct the name with a name that is not in the current list of names.
-        # We mark the face's match candidate attribute False so we can revisit this face and
-        # enter a new name to the list. In doing this we provide the user with a new selectbox (free_text_select).
+        # We mark the face's match candidate attribute False, so we can revisit this face and
+        # enter a new name to the list. In doing this we provide the user with a new select widget (free_text_select).
         if sess.selected_name == 'Someone else':
             _current_face.match_candidate = False
         else:
@@ -178,7 +178,7 @@ folder_names = [d for d in os.listdir(IMG_DIR) if os.path.isdir(os.path.join(IMG
 # Display a warning if there are no subfolders in the 'watch_folder'
 if not folder_names:
     st.warning("The watch folder is empty. Add a folder of images to the watch folder to begin.")
-# Streamlit selectbox widget, gives the user a way to select a folder of images
+# Streamlit select widget, gives the user a way to select a folder of images
 select_folder = st.selectbox(label='Choose a folder of images to scan for faces',
                              index=None,
                              options=folder_names,
