@@ -241,9 +241,9 @@ select_folder = st.selectbox(label='Choose a folder of images to scan for faces'
 
 if select_folder:
     # Streamlit button widget, kicks off the face detection workflow when pressed
-    detect_faces = st.button(label="Detect Faces")
-    if detect_faces:
-        # list all the images in the selected folder
+    start_face_detection = st.button(label="Detect Faces")
+    if start_face_detection:
+        # list all the images (paths) in the selected folder
         sess['image_paths'] = list(paths.list_images(os.path.join(IMG_DIR, select_folder)))
         # detect faces in all the images, get a list/queue of faces (instances of Face class)
         sess['faces_detected'] = strip_faces(sess.image_paths)
