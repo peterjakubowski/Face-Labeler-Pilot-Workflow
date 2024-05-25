@@ -62,15 +62,23 @@ class Face:
         img = img[_Y:_Y + _H, _X:_X + _W]
         return img
 
+    def normalize_face_location(self) -> tuple[float, ...]:
+        """
+        Normalize/scale the face location coordinates.
+        :return: Normalized/scaled bounding box (W, H, X, Y):
+        Width of the bounding box.
+        Height of the bounding box.
+        X coordinate of the left of the bounding box.
+        Y coordinate of the top of the bounding box.
+        """
 
-    def normalize_region(self):
         top, right, bottom, left = self.face_location
-        img_h, img_w = self.img_height, self.img_width
+        img_w, img_h = self.img_resized_width, self.img_resized_height
         _W = round((right - left) / img_h, 4)
         _H = round((bottom - top) / img_w, 4)
         _X = round(left / img_h, 4)
         _Y = round(top / img_w, 4)
-        return _W, _H, _X, _Y
+        return tuple([_W, _H, _X, _Y])
 
 
 def resize_image(image, size=1024):
