@@ -220,6 +220,8 @@ st.markdown(intro_text)
 # INFO: ===== Begin Step 1: Detect Faces ====
 st.subheader("Step 1: Detect Faces", divider="gray")
 
+# Set the image size for inference, the number of pixels the longest edge should be resized to
+IMG_SIZE = 1024
 # Set the path to the 'watch_folder' directory
 IMG_DIR = Path("watch_folder")
 # Make the 'watch_folder' directory if it does not exist
