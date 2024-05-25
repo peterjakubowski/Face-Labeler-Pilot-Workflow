@@ -80,6 +80,18 @@ class Face:
         _Y = round(top / img_w, 4)
         return tuple([_W, _H, _X, _Y])
 
+    def reverse_transform_face_location(self, width: int, height: int) -> tuple[int, ...]:
+        """
+        Reverse transform the normalized/scaled bounding box
+        given the width and height of an image.
+        :param width: width of image to scale bounding box to
+        :param height: height of image to scale bounding box to
+        :return: Reverse transformed bounding box (W, H, X, Y):
+        Width of the bounding box.
+        Height of the bounding box.
+        X coordinate of the left of the bounding box.
+        Y coordinate of the top of the bounding box.
+        """
 
 def resize_image(image, size=1024):
     """
