@@ -1,3 +1,4 @@
+import numpy
 import pandas as pd
 import streamlit as st
 from streamlit import session_state as sess
@@ -12,46 +13,139 @@ import uuid
 import time
 from collections import defaultdict
 from collections import deque
-import textwrap
 
 
 class Face:
-    # structure to store information about detected faces
-    def __init__(self, img_path, img_height, img_width, face_location, encoding):
+    """
+    structure to store information about detected faces
+    """
+
+    def __init__(self,
+                 img_path: str,
+                 img_width: int,
+                 img_height: int,
+                 img_resized_width: int,
+                 img_resized_height: int,
+                 face_location: tuple[int, ...],
+                 encoding: list) -> None:
+        """
+        Constructor for Face class objects.
+        :param img_path: path to the image the face was detected in.
+        :param img_width: original image width in pixels.
+        :param img_height: original image height in pixels.
+        :param img_resized_width: resized image width in pixels.
+        :param img_resized_height: resized image height in pixels.
+        :param face_location: location of the face in in the image (top, right, bottom, left).
+        :param encoding: encoding of the face detected in the image.
+        """
+
         self.img_path = img_path
-        self.img_height = img_height
         self.img_width = img_width
+        self.img_height = img_height
+        self.img_resized_width = img_resized_width
+        self.img_resized_height = img_resized_height
         self.face_location = face_location
-        self.face_top = 0
-        self.face_right = 0
-        self.face_bottom = 0
-        self.face_left = 0
         self.encoding = encoding
         self.match_candidate = True
         self.person_shown = ""
 
-    def open_image(self):
+    def open_face_image(self) -> numpy.ndarray:
+        """
+        Opens the image containing the current face using cv2
+        and crops the image to the region the face is in.
+        :return: image (numpy.ndarray) cropped to the current face.
+        """
+
         img = cv2.imread(self.img_path)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        top, right, bottom, left = self.face_location
-        img = img[top:bottom, left:right]
+        _W, _H, _X, _Y = self.reverse_transform_face_location(width=img.shape[1], height=img.shape[0])
+        img = img[_Y:_Y + _H, _X:_X + _W]
         return img
 
-    def resize_image(self, max_dim):
-        pass
+    def normalize_face_location(self) -> tuple[float, ...]:
+        """
+        Normalize/scale the face location coordinates.
+        :return: Normalized/scaled bounding box (W, H, X, Y):
+        Width of the bounding box.
+        Height of the bounding box.
+        X coordinate of the left of the bounding box.
+        Y coordinate of the top of the bounding box.
+        """
 
-    def normalize_region(self):
         top, right, bottom, left = self.face_location
-        img_h, img_w = self.img_height, self.img_width
+        img_w, img_h = self.img_resized_width, self.img_resized_height
         _W = round((right - left) / img_h, 4)
         _H = round((bottom - top) / img_w, 4)
         _X = round(left / img_h, 4)
         _Y = round(top / img_w, 4)
-        return _W, _H, _X, _Y
+        return tuple([_W, _H, _X, _Y])
+
+    def reverse_transform_face_location(self, width: int, height: int) -> tuple[int, ...]:
+        """
+        Reverse transform the normalized/scaled bounding box
+        given the width and height of an image.
+        :param width: width of image to scale bounding box to
+        :param height: height of image to scale bounding box to
+        :return: Reverse transformed bounding box (W, H, X, Y):
+        Width of the bounding box.
+        Height of the bounding box.
+        X coordinate of the left of the bounding box.
+        Y coordinate of the top of the bounding box.
+        """
+
+        _W, _H, _X, _Y = self.normalize_face_location()
+        _W = int(_W * height)
+        _H = int(_H * width)
+        _X = int(_X * height)
+        _Y = int(_Y * width)
+        return tuple([_W, _H, _X, _Y])
 
 
-# @ st.cache_data(show_spinner=False)
-def strip_faces(img_paths):
+def rescale_width_height(width: int, height: int, size: int) -> tuple[int, ...]:
+    """
+    Function for rescaling the width and height
+    of an image to keep aspect ratio.
+    :param width: original image width
+    :param height: original image height
+    :param size: desired length of the longest edge in pixels.
+    :return: width (w) and height (h) of resized image.
+    """
+
+    # check if the image is vertical,
+    # height is the longest edge
+    if height > width:
+        # set height to size
+        h = size
+        # determine the ratio for resizing
+        ratio = height / size
+        # calculate new width by dividing by ratio
+        w = int(width / ratio)
+    # check if the image is horizontal,
+    # width is the longest edge
+    elif height < width:
+        # set width to size
+        w = size
+        # determine the ratio for resizing
+        ratio = width / size
+        # calculate new height by dividing by ratio
+        h = int(height / ratio)
+    # if image is not vertical or horizontal,
+    # image must be square
+    else:
+        # set width and height to size
+        w = h = size
+    # return the new width and height
+    return tuple([w, h])
+
+
+def detect_faces(img_paths: list, img_size: int) -> deque:
+    """
+    Detects faces and get face locations and encodings in images.
+    :param img_paths: list of image paths.
+    :param img_size: number of pixels to resize the longest edge to for inference.
+    :return: instances of class Face in a queue (collections.deque()).
+    """
+
     # initialize status bar
     _status_bar = st.progress(0, 'Firing up the face detection algorithm!')
     time.sleep(1)
@@ -67,8 +161,9 @@ def strip_faces(img_paths):
         # convert image color from BGR to RGB
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         # resize the image for fast inference
-        resized_image = cv2.resize(image, (0, 0), fx=0.25, fy=0.25)
-        # detect face locations in image
+        _w, _h = rescale_width_height(width=image.shape[1], height=image.shape[0], size=img_size)
+        resized_image = cv2.resize(image, dsize=(_w, _h), interpolation=cv2.INTER_AREA)
+        # detect face locations in the resized image
         face_locations = face_recognition.face_locations(resized_image, model='hog')
         for face_location in face_locations:
             # get face encoding
@@ -78,9 +173,11 @@ def strip_faces(img_paths):
                                                         model="large")
             # update the queue with a new instance of class Face
             q.append(Face(img_path=img_paths[i],
-                          img_height = image.shape[0],
-                          img_width = image.shape[1],
-                          face_location=tuple([d * 4 for d in face_location]),
+                          img_width=image.shape[1],
+                          img_height=image.shape[0],
+                          img_resized_width=resized_image.shape[1],
+                          img_resized_height=resized_image.shape[0],
+                          face_location=face_location,
                           encoding=encodings)
                      )
 
@@ -89,14 +186,14 @@ def strip_faces(img_paths):
     return q
 
 
-def record_name():
+def record_name() -> None:
     if sess.selected_name:
         _current_face = sess['faces_detected'][0]
         # if the user selected 'Someone else', that means the face recognition algorithm
         # predicted the name belonging to the face, but the user disagrees with the prediction
         # and wants to correct the name with a name that is not in the current list of names.
-        # We mark the face's match candidate attribute False so we can revisit this face and
-        # enter a new name to the list. In doing this we provide the user with a new selectbox (free_text_select).
+        # We mark the face's match candidate attribute False, so we can revisit this face and
+        # enter a new name to the list. In doing this we provide the user with a new select widget (free_text_select).
         if sess.selected_name == 'Someone else':
             _current_face.match_candidate = False
         else:
@@ -123,6 +220,8 @@ st.markdown(intro_text)
 # INFO: ===== Begin Step 1: Detect Faces ====
 st.subheader("Step 1: Detect Faces", divider="gray")
 
+# Set the image size for inference, the number of pixels the longest edge should be resized to
+IMG_SIZE = 1024
 # Set the path to the 'watch_folder' directory
 IMG_DIR = Path("watch_folder")
 # Make the 'watch_folder' directory if it does not exist
@@ -132,7 +231,7 @@ folder_names = [d for d in os.listdir(IMG_DIR) if os.path.isdir(os.path.join(IMG
 # Display a warning if there are no subfolders in the 'watch_folder'
 if not folder_names:
     st.warning("The watch folder is empty. Add a folder of images to the watch folder to begin.")
-# Streamlit selectbox widget, gives the user a way to select a folder of images
+# Streamlit select widget, gives the user a way to select a folder of images
 select_folder = st.selectbox(label='Choose a folder of images to scan for faces',
                              index=None,
                              options=folder_names,
@@ -142,12 +241,12 @@ select_folder = st.selectbox(label='Choose a folder of images to scan for faces'
 
 if select_folder:
     # Streamlit button widget, kicks off the face detection workflow when pressed
-    detect_faces = st.button(label="Detect Faces")
-    if detect_faces:
-        # list all the images in the selected folder
+    start_face_detection = st.button(label="Detect Faces")
+    if start_face_detection:
+        # list all the images (paths) in the selected folder
         sess['image_paths'] = list(paths.list_images(os.path.join(IMG_DIR, select_folder)))
         # detect faces in all the images, get a list/queue of faces (instances of Face class)
-        sess['faces_detected'] = strip_faces(sess.image_paths)
+        sess['faces_detected'] = detect_faces(img_paths=sess.image_paths, img_size=IMG_SIZE)
         # count how many faces were detected
         sess['faces_count'] = len(sess.faces_detected)
         # count of faces labeled
@@ -180,7 +279,7 @@ if 'faces_detected' in sess:
         # pop the next face from the queue
         current_face = sess['faces_detected'][0]
         # open cropped image of current face
-        current_face_img = current_face.open_image()
+        current_face_img = current_face.open_face_image()
         # check if the current face has an encoding
         if len(current_face.encoding) > 0:
             # compare the face encoding to existing encodings to see if we can find a match
@@ -289,7 +388,7 @@ if 'faces_detected' in sess:
                                 elif face.person_shown not in tags["XMP:PersonInImage"]:
                                     # st.write(f'Appending {person_shown} to PersonInImage')
                                     et.execute(f"-XMP:PersonInImage+={face.person_shown}", image_path)
-                                W, H, X, Y = face.normalize_region()
+                                W, H, X, Y = face.normalize_face_location()
                                 if "XMP:RegionName" not in tags:
                                     # st.write(f'Setting RegionName to {person_shown}')
                                     execution_string = str("-XMP-mwg-rs:RegionInfo={AppliedToDimensions={"
