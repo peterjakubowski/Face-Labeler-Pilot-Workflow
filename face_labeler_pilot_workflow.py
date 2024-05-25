@@ -20,15 +20,31 @@ class Face:
     structure to store information about detected faces
     """
 
-    def __init__(self, img_path, img_height, img_width, face_location, encoding):
+    def __init__(self,
+                 img_path: str,
+                 img_width: int,
+                 img_height: int,
+                 img_resized_width: int,
+                 img_resized_height: int,
+                 face_location: tuple[int, ...],
+                 encoding: list) -> None:
+        """
+        Constructor for Face class objects.
+        :param img_path: path to the image the face was detected in.
+        :param img_width: original image width in pixels.
+        :param img_height: original image height in pixels.
+        :param img_resized_width: resized image width in pixels.
+        :param img_resized_height: resized image height in pixels.
+        :param face_location: location of the face in in the image (top, right, bottom, left).
+        :param encoding: encoding of the face detected in the image.
+        """
+
         self.img_path = img_path
-        self.img_height = img_height
         self.img_width = img_width
+        self.img_height = img_height
+        self.img_resized_width = img_resized_width
+        self.img_resized_height = img_resized_height
         self.face_location = face_location
-        self.face_top = 0
-        self.face_right = 0
-        self.face_bottom = 0
-        self.face_left = 0
         self.encoding = encoding
         self.match_candidate = True
         self.person_shown = ""
