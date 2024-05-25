@@ -93,19 +93,24 @@ class Face:
         Y coordinate of the top of the bounding box.
         """
 
-def resize_image(image, size=1024):
+        _W, _H, _X, _Y = self.normalize_face_location()
+        _W = int(_W * height)
+        _H = int(_H * width)
+        _X = int(_X * height)
+        _Y = int(_Y * width)
+        return tuple([_W, _H, _X, _Y])
+
+
+def rescale_width_height(width: int, height: int, size: int) -> tuple[int, ...]:
     """
     Function for rescaling the width and height
     of an image to keep aspect ratio.
-    :param image: image (opened with cv2) to resize.
+    :param width: original image width
+    :param height: original image height
     :param size: desired length of the longest edge in pixels.
     :return: width (w) and height (h) of resized image.
     """
 
-    # get image width
-    width = image.shape[1]
-    # get image height
-    height = image.shape[0]
     # check if the image is vertical,
     # height is the longest edge
     if height > width:
@@ -130,7 +135,7 @@ def resize_image(image, size=1024):
         # set width and height to size
         w = h = size
     # return the new width and height
-    return w, h
+    return tuple([w, h])
 
 
 # @ st.cache_data(show_spinner=False)
