@@ -138,7 +138,14 @@ def rescale_width_height(width: int, height: int, size: int) -> tuple[int, ...]:
     return tuple([w, h])
 
 
-def strip_faces(img_paths):
+def detect_faces(img_paths: list, img_size: int) -> deque:
+    """
+    Detects faces and get face locations and encodings in images.
+    :param img_paths: list of image paths.
+    :param img_size: number of pixels to resize the longest edge to for inference.
+    :return: instances of class Face in a queue (collections.deque()).
+    """
+
     # initialize status bar
     _status_bar = st.progress(0, 'Firing up the face detection algorithm!')
     time.sleep(1)
@@ -154,9 +161,9 @@ def strip_faces(img_paths):
         # convert image color from BGR to RGB
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         # resize the image for fast inference
-        _w, _h = resize_image(image=image, size=1024)
+        _w, _h = rescale_width_height(width=image.shape[1], height=image.shape[0], size=img_size)
         resized_image = cv2.resize(image, dsize=(_w, _h), interpolation=cv2.INTER_AREA)
-        # detect face locations in image
+        # detect face locations in the resized image
         face_locations = face_recognition.face_locations(resized_image, model='hog')
         for face_location in face_locations:
             # get face encoding
@@ -166,9 +173,11 @@ def strip_faces(img_paths):
                                                         model="large")
             # update the queue with a new instance of class Face
             q.append(Face(img_path=img_paths[i],
-                          img_height=resized_image.shape[0],
-                          img_width=resized_image.shape[1],
-                          face_location=tuple([d for d in face_location]),
+                          img_width=image.shape[1],
+                          img_height=image.shape[0],
+                          img_resized_width=resized_image.shape[1],
+                          img_resized_height=resized_image.shape[0],
+                          face_location=face_location,
                           encoding=encodings)
                      )
 
