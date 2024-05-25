@@ -246,7 +246,7 @@ if select_folder:
         # list all the images (paths) in the selected folder
         sess['image_paths'] = list(paths.list_images(os.path.join(IMG_DIR, select_folder)))
         # detect faces in all the images, get a list/queue of faces (instances of Face class)
-        sess['faces_detected'] = strip_faces(sess.image_paths)
+        sess['faces_detected'] = detect_faces(img_paths=sess.image_paths, img_size=IMG_SIZE)
         # count how many faces were detected
         sess['faces_count'] = len(sess.faces_detected)
         # count of faces labeled
@@ -279,7 +279,7 @@ if 'faces_detected' in sess:
         # pop the next face from the queue
         current_face = sess['faces_detected'][0]
         # open cropped image of current face
-        current_face_img = current_face.open_image()
+        current_face_img = current_face.open_face_image()
         # check if the current face has an encoding
         if len(current_face.encoding) > 0:
             # compare the face encoding to existing encodings to see if we can find a match
@@ -388,7 +388,7 @@ if 'faces_detected' in sess:
                                 elif face.person_shown not in tags["XMP:PersonInImage"]:
                                     # st.write(f'Appending {person_shown} to PersonInImage')
                                     et.execute(f"-XMP:PersonInImage+={face.person_shown}", image_path)
-                                W, H, X, Y = face.normalize_region()
+                                W, H, X, Y = face.normalize_face_location()
                                 if "XMP:RegionName" not in tags:
                                     # st.write(f'Setting RegionName to {person_shown}')
                                     execution_string = str("-XMP-mwg-rs:RegionInfo={AppliedToDimensions={"
