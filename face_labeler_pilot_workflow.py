@@ -62,8 +62,6 @@ class Face:
         img = img[_Y:_Y + _H, _X:_X + _W]
         return img
 
-    def resize_image(self, max_dim):
-        pass
 
     def normalize_region(self):
         top, right, bottom, left = self.face_location
