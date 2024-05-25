@@ -138,7 +138,6 @@ def rescale_width_height(width: int, height: int, size: int) -> tuple[int, ...]:
     return tuple([w, h])
 
 
-# @ st.cache_data(show_spinner=False)
 def strip_faces(img_paths):
     # initialize status bar
     _status_bar = st.progress(0, 'Firing up the face detection algorithm!')
