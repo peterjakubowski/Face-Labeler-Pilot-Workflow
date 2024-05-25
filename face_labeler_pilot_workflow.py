@@ -49,14 +49,17 @@ class Face:
         self.match_candidate = True
         self.person_shown = ""
 
-    def open_image(self):
+    def open_face_image(self) -> numpy.ndarray:
+        """
+        Opens the image containing the current face using cv2
+        and crops the image to the region the face is in.
+        :return: image (numpy.ndarray) cropped to the current face.
+        """
+
         img = cv2.imread(self.img_path)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        if max(img.shape[0], img.shape[1]) != max(self.img_width, self.img_height):
-            _w, _h = resize_image(image=img, size=max(self.img_width, self.img_height))
-            img = cv2.resize(img, dsize=(_w, _h), interpolation=cv2.INTER_AREA)
-        top, right, bottom, left = self.face_location
-        img = img[top:bottom, left:right]
+        _W, _H, _X, _Y = self.reverse_transform_face_location(width=img.shape[1], height=img.shape[0])
+        img = img[_Y:_Y + _H, _X:_X + _W]
         return img
 
     def resize_image(self, max_dim):
