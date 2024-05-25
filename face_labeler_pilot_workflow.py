@@ -186,7 +186,7 @@ def detect_faces(img_paths: list, img_size: int) -> deque:
     return q
 
 
-def record_name():
+def record_name() -> None:
     if sess.selected_name:
         _current_face = sess['faces_detected'][0]
         # if the user selected 'Someone else', that means the face recognition algorithm
