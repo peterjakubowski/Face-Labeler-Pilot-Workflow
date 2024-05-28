@@ -249,6 +249,12 @@ if select_folder:
         sess['faces_detected'] = detect_faces(img_paths=sess.image_paths, img_size=IMG_SIZE)
         # count how many faces were detected
         sess['faces_count'] = len(sess.faces_detected)
+        # if we didn't detect any faces, delete the queue from the session state and display a message
+        if sess.faces_count < 1:
+            del sess['faces_detected']
+            st.warning(f"Workflow complete! "
+                       f"Looked for faces in {len(sess['image_paths'])} images "
+                       f"and {sess['faces_count']} faces were found.")
         # count of faces labeled
         sess['face_i'] = 1
         # dictionary of labeled faces
