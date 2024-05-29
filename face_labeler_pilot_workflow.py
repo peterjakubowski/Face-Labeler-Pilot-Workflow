@@ -49,6 +49,11 @@ class Face:
         self.encoding = encoding
         self.match_candidate = True
         self.person_shown = ""
+        self.W = None
+        self.H = None
+        self.X = None
+        self.Y = None
+        self.normalize_face_location()
 
     def open_face_image(self) -> numpy.ndarray:
         """
@@ -63,10 +68,10 @@ class Face:
         img = img[_Y:_Y + _H, _X:_X + _W]
         return img
 
-    def normalize_face_location(self) -> tuple[float, ...]:
+    def normalize_face_location(self) -> None:
         """
         Normalize/scale the face location coordinates.
-        :return: Normalized/scaled bounding box (W, H, X, Y):
+        Bounding box (W, H, X, Y):
         Width of the bounding box.
         Height of the bounding box.
         X coordinate of the left of the bounding box.
@@ -75,11 +80,11 @@ class Face:
 
         top, right, bottom, left = self.face_location
         img_w, img_h = self.img_resized_width, self.img_resized_height
-        _W = round((right - left) / img_h, 4)
-        _H = round((bottom - top) / img_w, 4)
-        _X = round(left / img_h, 4)
-        _Y = round(top / img_w, 4)
-        return tuple([_W, _H, _X, _Y])
+        self.W = round((right - left) / img_h, 4)
+        self.H = round((bottom - top) / img_w, 4)
+        self.X = round(left / img_h, 4)
+        self.Y = round(top / img_w, 4)
+        return
 
     def reverse_transform_face_location(self, width: int, height: int) -> tuple[int, ...]:
         """
@@ -94,11 +99,12 @@ class Face:
         Y coordinate of the top of the bounding box.
         """
 
-        _W, _H, _X, _Y = self.normalize_face_location()
-        _W = int(_W * height)
-        _H = int(_H * width)
-        _X = int(_X * height)
-        _Y = int(_Y * width)
+        if None in [self.W, self.H, self.X, self.Y]:
+            self.normalize_face_location()
+        _W = int(self.W * height)
+        _H = int(self.H * width)
+        _X = int(self.X * height)
+        _Y = int(self.Y * width)
         return tuple([_W, _H, _X, _Y])
 
 
@@ -209,7 +215,6 @@ def record_name() -> None:
                     sess.data['encodings'].append(_current_face.encoding[0])
                     sess.data['names'].append(_current_face.person_shown)
             sess['faces_detected'].popleft()
-
     return
 
 
@@ -395,13 +400,12 @@ if 'faces_detected' in sess:
                                 elif face.person_shown not in tags["XMP:PersonInImage"]:
                                     # st.write(f'Appending {person_shown} to PersonInImage')
                                     et.execute(f"-XMP:PersonInImage+={face.person_shown}", image_path)
-                                W, H, X, Y = face.normalize_face_location()
                                 if "XMP:RegionName" not in tags:
                                     # st.write(f'Setting RegionName to {person_shown}')
                                     execution_string = str("-XMP-mwg-rs:RegionInfo={AppliedToDimensions={"
                                                            f"W={face.img_width}, H={face.img_height}, "
                                                            "Unit=pixel}, RegionList=[{Area={"
-                                                           f"W={W}, H={H}, X={X}, Y={Y},"
+                                                           f"W={face.W}, H={face.H}, X={face.X}, Y={face.Y},"
                                                            "Unit=normalized}, "
                                                            f"Name={face.person_shown},"
                                                            "Type=Face}]}")
@@ -410,7 +414,7 @@ if 'faces_detected' in sess:
                                 elif face.person_shown not in tags["XMP:RegionName"]:
                                     # st.write(f'Appending {person_shown} to RegionName')
                                     execution_string = str("-XMP-mwg-rs:RegionList+=[{Area={"
-                                                           f"W={W}, H={H}, X={X}, Y={Y},"
+                                                           f"W={face.W}, H={face.H}, X={face.X}, Y={face.Y},"
                                                            "Unit=normalized}, "
                                                            f"Name={face.person_shown},"
                                                            "Type=Face}]}")
@@ -425,15 +429,10 @@ if 'faces_detected' in sess:
                         csv_writer = csv.writer(csv_file, dialect='excel', delimiter=',')
                         csv_columns = ['filename', 'region_w', 'region_h', 'region_x', 'region_y', 'person_shown']
                         csv_writer.writerow(csv_columns)
-                        for p, f in sess['labeled'].items():
-                            filename = p.split('/')[-1]
-                            for face in f:
-                                region = face.normalize_face_location()
-                                csv_writer.writerow([filename,
-                                                     region[0],
-                                                     region[1],
-                                                     region[2],
-                                                     region[3],
-                                                     face.person_shown])
+                        for fp, faces in sess['labeled'].items():
+                            filename = fp.split('/')[-1]
+                            for f in faces:
+                                # region = f.normalized_face_location()
+                                csv_writer.writerow([filename, f.W, f.H, f.X, f.Y, f.person_shown])
 
                     st.success("Metadata exported to csv file! Workflow complete!", icon='✅')
