@@ -13,6 +13,7 @@ import uuid
 import time
 from collections import defaultdict
 from collections import deque
+import csv
 
 
 class Face:
@@ -418,3 +419,21 @@ if 'faces_detected' in sess:
                         j += 1
                     status_bar.empty()
                     st.success("Metadata saved to files! Workflow complete!", icon='✅')
+
+                elif export_metadata:
+                    with open(os.path.join(IMG_DIR, select_folder, 'metadata.csv'), 'w', newline='') as csv_file:
+                        csv_writer = csv.writer(csv_file, dialect='excel', delimiter=',')
+                        csv_columns = ['filename', 'region_w', 'region_h', 'region_x', 'region_y', 'person_shown']
+                        csv_writer.writerow(csv_columns)
+                        for p, f in sess['labeled'].items():
+                            filename = p.split('/')[-1]
+                            for face in f:
+                                region = face.normalize_face_location()
+                                csv_writer.writerow([filename,
+                                                     region[0],
+                                                     region[1],
+                                                     region[2],
+                                                     region[3],
+                                                     face.person_shown])
+
+                    st.success("Metadata exported to csv file! Workflow complete!", icon='✅')
