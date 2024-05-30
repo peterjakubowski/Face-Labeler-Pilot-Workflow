@@ -250,7 +250,8 @@ if select_folder:
     start_face_detection = st.button(label="Detect Faces")
     if start_face_detection:
         # list all the images (paths) in the selected folder
-        sess['image_paths'] = list(paths.list_images(os.path.join(IMG_DIR, select_folder)))
+        sess['image_paths'] = sorted(paths.list_images(os.path.join(IMG_DIR, select_folder)),
+                                     key=lambda x:x.split('/')[-1])
         # detect faces in all the images, get a list/queue of faces (instances of Face class)
         sess['faces_detected'] = detect_faces(img_paths=sess.image_paths, img_size=IMG_SIZE)
         # count how many faces were detected
