@@ -33,6 +33,7 @@ streamlit 1.32.2
 streamlit-free-text-select 0.0.5
 opencv-python 4.9.0.80
 imutils 0.5.4
+numpy 1.25.2
 dlib 19.23.1
 face-recognition 1.3.0
 PyExifTool 0.5.6
