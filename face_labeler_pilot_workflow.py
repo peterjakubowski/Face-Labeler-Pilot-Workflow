@@ -45,7 +45,7 @@ class Face:
         :param img_height: original image height in pixels.
         :param img_resized_width: resized image width in pixels.
         :param img_resized_height: resized image height in pixels.
-        :param face_location: location of the face in in the image (top, right, bottom, left).
+        :param face_location: location of the face in the image (top, right, bottom, left).
         :param encoding: encoding of the face detected in the image.
         """
 
