@@ -194,7 +194,8 @@ def detect_faces(img_paths: list, img_size: int) -> deque:
                           img_resized_width=resized_image.shape[1],
                           img_resized_height=resized_image.shape[0],
                           face_location=face_location,
-                          encoding=encodings)
+                          encoding=encodings
+                          )
                      )
 
     _status_bar.empty()
