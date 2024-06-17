@@ -53,8 +53,6 @@ Then open http://localhost:8501
 
 ## Future Improvements and Features
 
-* Add an option to let the tool approve matches without asking the user for confirmation based on some criteria like the number of matches or how close in distance a match is. The tool currently asks the user to approve the name for every face encountered.
-
 * Give the user an option to change the tolerance for finding a match.
 
 * Add additional face detection algorithms (or replace the current with another) that can better detect faces turned to the side or in profile. The current algorithm in use does best at detected faces that are turned towards the camera.
@@ -62,6 +60,3 @@ Then open http://localhost:8501
 * Try using an object detection model that first detects people (not faces) in an image before checking for faces  with the face detection algorithm. This could help increase the probability of finding a person in the image that needs to be tagged. A person without a face would always need to be manually tagged using this method since there would be no way to get a face encoding to compare to the list of known faces.
 
 * Create some kind of option to add additional tags based on the person shown in the image. This would require the user to supply keys and values for data lookup to take place. A possible use case could be e-commerce on-figure photography where a particular model is associated with products and skus that must be tagged in a shot. Images would be placed in the watch folder organized by shots (shot number) in seperate subfolders. A csv file could be included to provide model names (key), shot number(key), and product/skus (values).
-
-* Add a button to export the data to a csv file. Include the filename or image path, names, and face locations.
-
