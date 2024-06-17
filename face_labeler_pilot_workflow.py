@@ -390,8 +390,7 @@ if 'faces_detected' in sess:
                     status_bar = st.progress(0, status_text)
                     time.sleep(1)
                     n = len(sess.labeled)
-                    j = 0
-                    for image_path, faces in sess.labeled.items():
+                    for j, (image_path, faces) in enumerate(sess.labeled.items()):
                         status_bar.progress((j + 1) / n,
                                             text=f'({j + 1} of {n}) Writing metadata to {image_path.split("/")[-1]}...')
                         for i, face in enumerate(faces):
@@ -426,7 +425,7 @@ if 'faces_detected' in sess:
                                                            "Type=Face}]}")
                                     print(execution_string)
                                     et.execute(execution_string, image_path)
-                        j += 1
+                                    
                     status_bar.empty()
                     st.success("Metadata saved to files! Workflow complete!", icon='✅')
 
