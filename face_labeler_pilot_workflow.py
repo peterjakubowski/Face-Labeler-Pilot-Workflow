@@ -7,6 +7,8 @@
 # and detects faces for labeling.
 #
 #
+
+# Import necessary packages
 import numpy as np
 import pandas as pd
 import streamlit as st
@@ -204,6 +206,10 @@ def detect_faces(img_paths: list, img_size: int) -> deque:
 
 
 def record_name() -> None:
+    """
+
+    :return: None
+    """
     if sess.selected_name:
         _current_face = sess['faces_detected'][0]
         if sess.selected_name == 'Someone else':
@@ -223,12 +229,19 @@ def record_name() -> None:
     return
 
 
+#       ==========================================
 # INFO: ===== Face Labeler Pilot Introduction ====
+#       ==========================================
+
 st.title("Face Labeler Pilot")
 intro_text = ("Face Labeler Pilot is a 3-step post-production workflow tool "
               "that uses face recognition to tag people shown in photographs.")
 st.markdown(intro_text)
+
+#       =====================================
 # INFO: ===== Begin Step 1: Detect Faces ====
+#       =====================================
+
 st.subheader("Step 1: Detect Faces", divider="gray")
 
 # Set the image size for inference, the number of pixels the longest edge should be resized to
@@ -283,7 +296,10 @@ if 'faces_detected' in sess:
                     )
     st.success(success_text, icon='✅')
 
+    #       ====================================
     # INFO: ===== Begin Step 2: Label Faces ====
+    #       ====================================
+
     st.subheader("Step 2: Label Faces", divider="gray")
 
     # check if there are faces in our queue
@@ -370,15 +386,20 @@ if 'faces_detected' in sess:
                 st.success(f'{len(sess.labeled)} faces were labeled. Workflow complete!',
                            icon='✅')
             elif sess['labeled']:
-                success_text = "All faces have been labeled!"
-                st.success(success_text, icon='✅')
+                st.success('All faces have been labeled!', icon='✅')
+
+                # display a dataframe with counts of unique names/labels
                 df = pd.DataFrame(data=sess.name_options.items(),
                                   columns=['names', 'counts'])
                 df.set_index('names', inplace=True)
                 st.dataframe(df.sort_index())
 
+                #       ==================================================
                 # INFO: ===== Begin Step 3: Write/Save/Embed Metadata ====
+                #       ==================================================
+
                 st.subheader("Step 3: Save Metadata", divider="gray")
+
                 col1, col2, _, _ = st.columns(4)
                 with col1:
                     write_metadata = st.button(label="Write Metadata")
@@ -386,8 +407,7 @@ if 'faces_detected' in sess:
                     export_metadata = st.button(label="Export Metadata")
 
                 if write_metadata:
-                    status_text = 'Begin writing metadata to files!'
-                    status_bar = st.progress(0, status_text)
+                    status_bar = st.progress(0, 'Begin writing metadata to files!')
                     time.sleep(1)
                     n = len(sess.labeled)
                     for j, (image_path, faces) in enumerate(sess.labeled.items()):
