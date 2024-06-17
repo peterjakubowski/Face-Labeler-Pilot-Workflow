@@ -1,4 +1,3 @@
-import numpy
 # Face Labeler Pilot is a Python-based photography workflow tool
 # for tagging people shown in images using face recognition.
 #
@@ -8,6 +7,7 @@ import numpy
 # and detects faces for labeling.
 #
 #
+import numpy as np
 import pandas as pd
 import streamlit as st
 from streamlit import session_state as sess
@@ -64,7 +64,7 @@ class Face:
         self.Y = None
         self.normalize_face_location()
 
-    def open_face_image(self) -> numpy.ndarray:
+    def open_face_image(self) -> np.ndarray:
         """
         Opens the image containing the current face using cv2
         and crops the image to the region the face is in.
