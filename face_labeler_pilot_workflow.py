@@ -206,11 +206,6 @@ def detect_faces(img_paths: list, img_size: int) -> deque:
 def record_name() -> None:
     if sess.selected_name:
         _current_face = sess['faces_detected'][0]
-        # if the user selected 'Someone else', that means the face recognition algorithm
-        # predicted the name belonging to the face, but the user disagrees with the prediction
-        # and wants to correct the name with a name that is not in the current list of names.
-        # We mark the face's match candidate attribute False, so we can revisit this face and
-        # enter a new name to the list. In doing this we provide the user with a new select widget (free_text_select).
         if sess.selected_name == 'Someone else':
             _current_face.match_candidate = False
         else:
