@@ -1,4 +1,13 @@
 import numpy
+# Face Labeler Pilot is a Python-based photography workflow tool
+# for tagging people shown in images using face recognition.
+#
+# Author: Peter Jakubowski
+# Date: 5/9/2024
+# Description: Streamlit app that opens a selected folder of images
+# and detects faces for labeling.
+#
+#
 import pandas as pd
 import streamlit as st
 from streamlit import session_state as sess
