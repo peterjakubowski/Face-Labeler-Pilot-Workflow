@@ -214,6 +214,7 @@ def record_name() -> None:
     the queue of faces to label.
     :return: None
     """
+
     if sess.selected_name:
         # peek at the first face in the queue of detected faces
         _current_face = sess['faces_detected'][0]
@@ -238,6 +239,7 @@ def record_name() -> None:
                     sess.data['names'].append(_current_face.person_shown)
             # pop the current face from the queue
             sess['faces_detected'].popleft()
+
     return
 
 
@@ -341,9 +343,13 @@ if 'faces_detected' in sess:
                     name = sess.data['names'][i]
                     count[name] = count.get(name, 0) + 1
                 predicted_name = max(count, key=count.get)
+
+                # if auto confirm matches is not checked, then provide a form to label the current face
                 if not auto_confirm_matches:
                     with st.form(str(uuid.uuid4())):
+                        # display a thumbnail of the current face
                         st.image(current_face_img, width=100)
+
                         if current_face.match_candidate:
                             st.write(f'I think this face belongs to **{predicted_name}**, can you confirm?')
                             st.selectbox(label=('The predicted name has been pre-selected, '
@@ -354,6 +360,7 @@ if 'faces_detected' in sess:
                                          options=['Not a face', 'Someone else'] + sorted(sess.name_options.keys()),
                                          index=sorted(sess.name_options.keys()).index(predicted_name) + 2,
                                          key='selected_name')
+
                         elif not current_face.match_candidate:
                             st.write((f"I think this face belongs to **{predicted_name}**, "
                                       "but you think it's someone else, who do you think this is?"))
@@ -362,8 +369,12 @@ if 'faces_detected' in sess:
                                                        'Select "Not a face" to skip this face.'),
                                                 options=sorted(sess.name_options.keys()),
                                                 key="selected_name")
+
                         st.form_submit_button(label='Submit', on_click=record_name)
+
+                # if auto confirm matches is checked, then label the current face with the predicted name
                 elif auto_confirm_matches:
+                    # display a thumbnail of the current face
                     st.image(current_face_img, width=100)
                     st.write(f"This face belongs to **{predicted_name}**")
                     sess['selected_name'] = predicted_name
@@ -374,22 +385,28 @@ if 'faces_detected' in sess:
 
             else:
                 with st.form(str(uuid.uuid4())):
+                    # display a thumbnail of the current face
                     st.image(current_face_img, width=100)
                     st.write("I don't recognize this face, who is this?")
                     st_free_text_select(label=('Type in a new name or select one from the list. '
                                                'Select "Not a face" to skip this face.'),
                                         options=['Not a face'] + sorted(sess.name_options.keys()),
                                         key="selected_name")
+
                     st.form_submit_button(label='Submit', on_click=record_name)
+
         elif not current_face.encoding:
             with st.form(str(uuid.uuid4())):
+                # display a thumbnail of the current face
                 st.image(current_face_img, width=100)
                 st.write('This face has no encoding. Is this a face?')
                 st_free_text_select(label=('Type in a new name or select one from the list. '
                                            'Select "Not a face" to skip this face.'),
                                     options=['Not a face'] + sorted(sess.name_options.keys()),
                                     key="selected_name")
+
                 st.form_submit_button(label='Continue', on_click=record_name)
+
     # if our queue of faces is empty, check if we have labeled any images
     if not sess['faces_detected']:
         # if we have labeled data, let's embed the face locations and names in the image metadata
@@ -412,6 +429,7 @@ if 'faces_detected' in sess:
 
                 st.subheader("Step 3: Save Metadata", divider="gray")
 
+                # created columns for buttons to display side-by-side
                 col1, col2, _, _ = st.columns(4)
                 with col1:
                     write_metadata = st.button(label="Write Metadata")
