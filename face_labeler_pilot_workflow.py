@@ -207,24 +207,36 @@ def detect_faces(img_paths: list, img_size: int) -> deque:
 
 def record_name() -> None:
     """
-
+    Function for recording a name for a labeled person.
+    Updates the current face class with modifications.
+    If the current face is labeled, then it is added to
+    the dictionary of labeled faces and removed from
+    the queue of faces to label.
     :return: None
     """
     if sess.selected_name:
+        # peek at the first face in the queue of detected faces
         _current_face = sess['faces_detected'][0]
         if sess.selected_name == 'Someone else':
             _current_face.match_candidate = False
         else:
             if sess.selected_name == 'Not a face':
+                # decrement the count of detected faces
                 sess.faces_count -= 1
             else:
+                # update the current face's person shown attribute with the selected name
                 _current_face.person_shown = sess.selected_name
+                # increment the count for the number of times faces have been labeled with this name
                 sess.name_options[_current_face.person_shown] += 1
                 sess.face_i += 1
+                # add the current face to the dictionary of labeled faces
                 sess.labeled[_current_face.img_path].append(_current_face)
+                # if the current face has an encoding, append it along with the name
+                # to the list of encodings and names for future face recognitions
                 if len(_current_face.encoding) > 0:
                     sess.data['encodings'].append(_current_face.encoding[0])
                     sess.data['names'].append(_current_face.person_shown)
+            # pop the current face from the queue
             sess['faces_detected'].popleft()
     return
 
