@@ -418,15 +418,11 @@ if 'faces_detected' in sess:
                             with exiftool.ExifToolHelper() as et:
                                 tags = et.get_tags(files=image_path,
                                                    tags=["XMP:RegionName", "XMP:RegionType", "XMP:PersonInImage"])[0]
-                                # st.write(tags)
                                 if "XMP:PersonInImage" not in tags:
-                                    # st.write(f'Setting PersonInImage to {person_shown}')
                                     et.execute(f"-XMP:PersonInImage={face.person_shown}", image_path)
                                 elif face.person_shown not in tags["XMP:PersonInImage"]:
-                                    # st.write(f'Appending {person_shown} to PersonInImage')
                                     et.execute(f"-XMP:PersonInImage+={face.person_shown}", image_path)
                                 if "XMP:RegionName" not in tags:
-                                    # st.write(f'Setting RegionName to {person_shown}')
                                     execution_string = str("-XMP-mwg-rs:RegionInfo={AppliedToDimensions={"
                                                            f"W={face.img_width}, H={face.img_height}, "
                                                            "Unit=pixel}, RegionList=[{Area={"
@@ -437,7 +433,6 @@ if 'faces_detected' in sess:
                                     print(execution_string)
                                     et.execute(execution_string, image_path)
                                 elif face.person_shown not in tags["XMP:RegionName"]:
-                                    # st.write(f'Appending {person_shown} to RegionName')
                                     execution_string = str("-XMP-mwg-rs:RegionList+=[{Area={"
                                                            f"W={face.W}, H={face.H}, X={face.X}, Y={face.Y},"
                                                            "Unit=normalized}, "
@@ -445,7 +440,7 @@ if 'faces_detected' in sess:
                                                            "Type=Face}]}")
                                     print(execution_string)
                                     et.execute(execution_string, image_path)
-                                    
+
                     status_bar.empty()
                     st.success("Metadata saved to files! Workflow complete!", icon='✅')
 
