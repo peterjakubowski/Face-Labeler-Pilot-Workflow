@@ -1,4 +1,15 @@
-import numpy
+# Face Labeler Pilot is a Python-based photography workflow tool
+# for tagging people shown in images using face recognition.
+#
+# Author: Peter Jakubowski
+# Date: 5/9/2024
+# Description: Streamlit app that opens a selected folder of images
+# and detects faces for labeling.
+#
+#
+
+# Import necessary packages
+import numpy as np
 import pandas as pd
 import streamlit as st
 from streamlit import session_state as sess
@@ -36,7 +47,7 @@ class Face:
         :param img_height: original image height in pixels.
         :param img_resized_width: resized image width in pixels.
         :param img_resized_height: resized image height in pixels.
-        :param face_location: location of the face in in the image (top, right, bottom, left).
+        :param face_location: location of the face in the image (top, right, bottom, left).
         :param encoding: encoding of the face detected in the image.
         """
 
@@ -55,7 +66,7 @@ class Face:
         self.Y = None
         self.normalize_face_location()
 
-    def open_face_image(self) -> numpy.ndarray:
+    def open_face_image(self) -> np.ndarray:
         """
         Opens the image containing the current face using cv2
         and crops the image to the region the face is in.
@@ -185,7 +196,8 @@ def detect_faces(img_paths: list, img_size: int) -> deque:
                           img_resized_width=resized_image.shape[1],
                           img_resized_height=resized_image.shape[0],
                           face_location=face_location,
-                          encoding=encodings)
+                          encoding=encodings
+                          )
                      )
 
     _status_bar.empty()
@@ -194,36 +206,56 @@ def detect_faces(img_paths: list, img_size: int) -> deque:
 
 
 def record_name() -> None:
+    """
+    Function for recording a name for a labeled person.
+    Updates the current face class with modifications.
+    If the current face is labeled, then it is added to
+    the dictionary of labeled faces and removed from
+    the queue of faces to label.
+    :return: None
+    """
+
     if sess.selected_name:
+        # peek at the first face in the queue of detected faces
         _current_face = sess['faces_detected'][0]
-        # if the user selected 'Someone else', that means the face recognition algorithm
-        # predicted the name belonging to the face, but the user disagrees with the prediction
-        # and wants to correct the name with a name that is not in the current list of names.
-        # We mark the face's match candidate attribute False, so we can revisit this face and
-        # enter a new name to the list. In doing this we provide the user with a new select widget (free_text_select).
         if sess.selected_name == 'Someone else':
             _current_face.match_candidate = False
         else:
             if sess.selected_name == 'Not a face':
+                # decrement the count of detected faces
                 sess.faces_count -= 1
             else:
+                # update the current face's person shown attribute with the selected name
                 _current_face.person_shown = sess.selected_name
+                # increment the count for the number of times faces have been labeled with this name
                 sess.name_options[_current_face.person_shown] += 1
                 sess.face_i += 1
+                # add the current face to the dictionary of labeled faces
                 sess.labeled[_current_face.img_path].append(_current_face)
+                # if the current face has an encoding, append it along with the name
+                # to the list of encodings and names for future face recognitions
                 if len(_current_face.encoding) > 0:
                     sess.data['encodings'].append(_current_face.encoding[0])
                     sess.data['names'].append(_current_face.person_shown)
+            # pop the current face from the queue
             sess['faces_detected'].popleft()
+
     return
 
 
+#       ==========================================
 # INFO: ===== Face Labeler Pilot Introduction ====
+#       ==========================================
+
 st.title("Face Labeler Pilot")
 intro_text = ("Face Labeler Pilot is a 3-step post-production workflow tool "
               "that uses face recognition to tag people shown in photographs.")
 st.markdown(intro_text)
+
+#       =====================================
 # INFO: ===== Begin Step 1: Detect Faces ====
+#       =====================================
+
 st.subheader("Step 1: Detect Faces", divider="gray")
 
 # Set the image size for inference, the number of pixels the longest edge should be resized to
@@ -251,7 +283,7 @@ if select_folder:
     if start_face_detection:
         # list all the images (paths) in the selected folder
         sess['image_paths'] = sorted(paths.list_images(os.path.join(IMG_DIR, select_folder)),
-                                     key=lambda x:x.split('/')[-1])
+                                     key=lambda x: x.split('/')[-1])
         # detect faces in all the images, get a list/queue of faces (instances of Face class)
         sess['faces_detected'] = detect_faces(img_paths=sess.image_paths, img_size=IMG_SIZE)
         # count how many faces were detected
@@ -278,7 +310,10 @@ if 'faces_detected' in sess:
                     )
     st.success(success_text, icon='✅')
 
+    #       ====================================
     # INFO: ===== Begin Step 2: Label Faces ====
+    #       ====================================
+
     st.subheader("Step 2: Label Faces", divider="gray")
 
     # check if there are faces in our queue
@@ -308,9 +343,13 @@ if 'faces_detected' in sess:
                     name = sess.data['names'][i]
                     count[name] = count.get(name, 0) + 1
                 predicted_name = max(count, key=count.get)
+
+                # if auto confirm matches is not checked, then provide a form to label the current face
                 if not auto_confirm_matches:
                     with st.form(str(uuid.uuid4())):
+                        # display a thumbnail of the current face
                         st.image(current_face_img, width=100)
+
                         if current_face.match_candidate:
                             st.write(f'I think this face belongs to **{predicted_name}**, can you confirm?')
                             st.selectbox(label=('The predicted name has been pre-selected, '
@@ -321,6 +360,7 @@ if 'faces_detected' in sess:
                                          options=['Not a face', 'Someone else'] + sorted(sess.name_options.keys()),
                                          index=sorted(sess.name_options.keys()).index(predicted_name) + 2,
                                          key='selected_name')
+
                         elif not current_face.match_candidate:
                             st.write((f"I think this face belongs to **{predicted_name}**, "
                                       "but you think it's someone else, who do you think this is?"))
@@ -329,8 +369,12 @@ if 'faces_detected' in sess:
                                                        'Select "Not a face" to skip this face.'),
                                                 options=sorted(sess.name_options.keys()),
                                                 key="selected_name")
+
                         st.form_submit_button(label='Submit', on_click=record_name)
+
+                # if auto confirm matches is checked, then label the current face with the predicted name
                 elif auto_confirm_matches:
+                    # display a thumbnail of the current face
                     st.image(current_face_img, width=100)
                     st.write(f"This face belongs to **{predicted_name}**")
                     sess['selected_name'] = predicted_name
@@ -341,22 +385,28 @@ if 'faces_detected' in sess:
 
             else:
                 with st.form(str(uuid.uuid4())):
+                    # display a thumbnail of the current face
                     st.image(current_face_img, width=100)
                     st.write("I don't recognize this face, who is this?")
                     st_free_text_select(label=('Type in a new name or select one from the list. '
                                                'Select "Not a face" to skip this face.'),
                                         options=['Not a face'] + sorted(sess.name_options.keys()),
                                         key="selected_name")
+
                     st.form_submit_button(label='Submit', on_click=record_name)
+
         elif not current_face.encoding:
             with st.form(str(uuid.uuid4())):
+                # display a thumbnail of the current face
                 st.image(current_face_img, width=100)
                 st.write('This face has no encoding. Is this a face?')
                 st_free_text_select(label=('Type in a new name or select one from the list. '
                                            'Select "Not a face" to skip this face.'),
                                     options=['Not a face'] + sorted(sess.name_options.keys()),
                                     key="selected_name")
+
                 st.form_submit_button(label='Continue', on_click=record_name)
+
     # if our queue of faces is empty, check if we have labeled any images
     if not sess['faces_detected']:
         # if we have labeled data, let's embed the face locations and names in the image metadata
@@ -365,15 +415,21 @@ if 'faces_detected' in sess:
                 st.success(f'{len(sess.labeled)} faces were labeled. Workflow complete!',
                            icon='✅')
             elif sess['labeled']:
-                success_text = "All faces have been labeled!"
-                st.success(success_text, icon='✅')
+                st.success('All faces have been labeled!', icon='✅')
+
+                # display a dataframe with counts of unique names/labels
                 df = pd.DataFrame(data=sess.name_options.items(),
                                   columns=['names', 'counts'])
                 df.set_index('names', inplace=True)
                 st.dataframe(df.sort_index())
 
+                #       ==================================================
                 # INFO: ===== Begin Step 3: Write/Save/Embed Metadata ====
+                #       ==================================================
+
                 st.subheader("Step 3: Save Metadata", divider="gray")
+
+                # created columns for buttons to display side-by-side
                 col1, col2, _, _ = st.columns(4)
                 with col1:
                     write_metadata = st.button(label="Write Metadata")
@@ -381,12 +437,10 @@ if 'faces_detected' in sess:
                     export_metadata = st.button(label="Export Metadata")
 
                 if write_metadata:
-                    status_text = 'Begin writing metadata to files!'
-                    status_bar = st.progress(0, status_text)
+                    status_bar = st.progress(0, 'Begin writing metadata to files!')
                     time.sleep(1)
                     n = len(sess.labeled)
-                    j = 0
-                    for image_path, faces in sess.labeled.items():
+                    for j, (image_path, faces) in enumerate(sess.labeled.items()):
                         status_bar.progress((j + 1) / n,
                                             text=f'({j + 1} of {n}) Writing metadata to {image_path.split("/")[-1]}...')
                         for i, face in enumerate(faces):
@@ -394,15 +448,11 @@ if 'faces_detected' in sess:
                             with exiftool.ExifToolHelper() as et:
                                 tags = et.get_tags(files=image_path,
                                                    tags=["XMP:RegionName", "XMP:RegionType", "XMP:PersonInImage"])[0]
-                                # st.write(tags)
                                 if "XMP:PersonInImage" not in tags:
-                                    # st.write(f'Setting PersonInImage to {person_shown}')
                                     et.execute(f"-XMP:PersonInImage={face.person_shown}", image_path)
                                 elif face.person_shown not in tags["XMP:PersonInImage"]:
-                                    # st.write(f'Appending {person_shown} to PersonInImage')
                                     et.execute(f"-XMP:PersonInImage+={face.person_shown}", image_path)
                                 if "XMP:RegionName" not in tags:
-                                    # st.write(f'Setting RegionName to {person_shown}')
                                     execution_string = str("-XMP-mwg-rs:RegionInfo={AppliedToDimensions={"
                                                            f"W={face.img_width}, H={face.img_height}, "
                                                            "Unit=pixel}, RegionList=[{Area={"
@@ -413,7 +463,6 @@ if 'faces_detected' in sess:
                                     print(execution_string)
                                     et.execute(execution_string, image_path)
                                 elif face.person_shown not in tags["XMP:RegionName"]:
-                                    # st.write(f'Appending {person_shown} to RegionName')
                                     execution_string = str("-XMP-mwg-rs:RegionList+=[{Area={"
                                                            f"W={face.W}, H={face.H}, X={face.X}, Y={face.Y},"
                                                            "Unit=normalized}, "
@@ -421,7 +470,7 @@ if 'faces_detected' in sess:
                                                            "Type=Face}]}")
                                     print(execution_string)
                                     et.execute(execution_string, image_path)
-                        j += 1
+
                     status_bar.empty()
                     st.success("Metadata saved to files! Workflow complete!", icon='✅')
 
