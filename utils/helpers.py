@@ -41,7 +41,7 @@ def run_face_detection_workflow(select_folder: str):
     st.session_state['name_options'] = defaultdict(int)
 
 
-def record_name() -> None:
+def record_name(selected_name: str) -> None:
     """
     Function for recording a name for a labeled person.
     Updates the current face class with modifications.
@@ -51,18 +51,19 @@ def record_name() -> None:
     :return: None
     """
 
-    if st.session_state.selected_name:
+    # if st.session_state.selected_name:
+    if selected_name:
         # peek at the first face in the queue of detected faces
         current_face = st.session_state['faces_detected'][0]
         # if st.session_state.selected_name == 'Someone else':
         #     current_face.match_candidate = False
         # else:
-        if st.session_state.selected_name == 'Not a face':
+        if selected_name == 'Not a face':
             # decrement the count of detected faces
             st.session_state.faces_count -= 1
         else:
             # update the current face's person shown attribute with the selected name
-            current_face.person_shown = st.session_state.selected_name
+            current_face.person_shown = selected_name
             # increment the count for the number of times faces have been labeled with this name
             st.session_state.name_options[current_face.person_shown] += 1
             st.session_state.face_i += 1
@@ -76,6 +77,8 @@ def record_name() -> None:
         # pop the current face from the queue
         st.session_state['faces_detected'].popleft()
 
-        st.session_state['selected_name'] = None
+        # st.session_state['selected_name'] = None
+
+        # del st.session_state['selected_name']
 
     return
