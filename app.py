@@ -20,6 +20,7 @@ from config import COMPARE_FACES_TOLERANCE, AUTO_CONFIRM_MATCHES_TIME
 
 
 def streamlit_app():
+    
     #       ==========================================
     # INFO: ===== Face Labeler Pilot Introduction ====
     #       ==========================================
@@ -125,7 +126,6 @@ def streamlit_app():
                                                              st.session_state.name_options.keys()),
                                                          index=sorted(st.session_state.name_options.keys()).index(
                                                              predicted_name) + 1,
-                                                         key='selected_name',
                                                          accept_new_options=True,
                                                          placeholder=None)
 
@@ -142,7 +142,6 @@ def streamlit_app():
                         st.selectbox(label="Predicted name",
                                      options=sorted(st.session_state.name_options.keys()),
                                      index=sorted(st.session_state.name_options.keys()).index(predicted_name),
-                                     key='selected_name',
                                      disabled=True
                                      )
                         # wait for a moment, user can still interrupt by unchecking auto confirm matches
@@ -151,7 +150,7 @@ def streamlit_app():
                         st.rerun()
 
                 else:
-                    with st.form(key="new_face_form", clear_on_submit=False):
+                    with st.form(key="new_face_form", clear_on_submit=True):
                         # display a thumbnail of the current face
                         st.image(current_face_img, width=100)
                         st.write("I don't recognize this face, who is this?")
@@ -159,7 +158,6 @@ def streamlit_app():
                                                             'Select "Not a face" to skip this face.'),
                                                      options=['Not a face'] + sorted(
                                                          st.session_state.name_options.keys()),
-                                                     key='selected_name',
                                                      accept_new_options=True,
                                                      placeholder=None,
                                                      index=None)
@@ -177,7 +175,6 @@ def streamlit_app():
                     selected_name = st.selectbox(label=('Type in a new name or select one from the list. '
                                                         'Select "Not a face" to skip this face.'),
                                                  options=['Not a face'] + sorted(st.session_state.name_options.keys()),
-                                                 key="selected_name",
                                                  accept_new_options=True,
                                                  placeholder=None,
                                                  index=0
