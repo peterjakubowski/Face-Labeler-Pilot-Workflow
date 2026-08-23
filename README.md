@@ -119,13 +119,13 @@ PyExifTool 0.5.6
 
 #### Exiftool
 
-Additionally, [Exiftool](https://exiftool.org/) must be installed on your system in order to read, write and edit metadata using [PyExifTool](https://pypi.org/project/PyExifTool/). Installation instructions can be found on the Exiftool website [here](https://exiftool.org/install.html).
+Additionally, [Exiftool](https://exiftool.org/) must be installed on your system in order to read, write and edit image metadata using [PyExifTool](https://pypi.org/project/PyExifTool/). Installation instructions can be found on the Exiftool website [here](https://exiftool.org/install.html).
 
 ## Launching the tool
 
 To launch the Streamlit server within the virtual environment, run the following command while the virtual environment is activated (in your command prompt, you should see `(.venv)` if using a Python virtual environment and `(facelabelerpilot_env)` if using conda):
 
-```
+```commandline
 streamlit run app.py
 ```
 
