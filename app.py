@@ -11,14 +11,12 @@
 # Import necessary packages
 import pandas as pd
 import streamlit as st
-# from streamlit_free_text_select import st_free_text_select
 import face_recognition
-# import uuid
 import time
 from utils.helpers import list_folders_in_watch_folder, run_face_detection_workflow, record_name
 from utils.exiftool import write_metadata_with_exiftool
 from utils.csv import export_metadata_to_csv
-from config import COMPARE_FACES_TOLERANCE
+from config import COMPARE_FACES_TOLERANCE, AUTO_CONFIRM_MATCHES_TIME
 
 
 def streamlit_app():
@@ -55,6 +53,13 @@ def streamlit_app():
         # Streamlit button widget, kicks off the face detection workflow when pressed
         start_face_detection = st.button(label="Detect Faces")
         if start_face_detection:
+
+            #       ==========================================
+            # INFO: ===== Run face detection workflow:    ====
+            #       ===== Scan all images in the selected ====
+            #       ===== folder and detect all faces.    ====
+            #       ==========================================
+
             run_face_detection_workflow(select_folder)
 
     if 'faces_detected' in st.session_state:
@@ -84,6 +89,12 @@ def streamlit_app():
             current_face_img = current_face.open_face_image()
             # check if the current face has an encoding
             if len(current_face.encoding) > 0:
+
+                #       ==============================================
+                # INFO: ===== Begin face recognition:             ====
+                #       ===== Compare current face to known faces ====
+                #       ==============================================
+
                 # compare the face encoding to existing encodings to see if we can find a match
                 # note: the lower the tolerance, the more sensitive the algorithm is at matching faces
                 matches = face_recognition.compare_faces(st.session_state.data['encodings'],
@@ -91,6 +102,7 @@ def streamlit_app():
                                                          tolerance=COMPARE_FACES_TOLERANCE)
 
                 if True in matches:
+                    # count matches and find the name with the most matches
                     matched_indices = [i for (i, b) in enumerate(matches) if b]
                     count = {}
                     for i in matched_indices:
@@ -104,7 +116,6 @@ def streamlit_app():
                             # display a thumbnail of the current face
                             st.image(current_face_img, width=100)
 
-                            # if current_face.match_candidate:
                             st.write(f'I think this face belongs to **{predicted_name}**, can you confirm?')
                             selected_name = st.selectbox(label=('The predicted name has been pre-selected, '
                                                                 'click the submit button to confirm.\n\n'
@@ -114,7 +125,7 @@ def streamlit_app():
                                                              st.session_state.name_options.keys()),
                                                          index=sorted(st.session_state.name_options.keys()).index(
                                                              predicted_name) + 1,
-                                                         # key='selected_name',
+                                                         key='selected_name',
                                                          accept_new_options=True,
                                                          placeholder=None)
 
@@ -128,15 +139,14 @@ def streamlit_app():
                         # display a thumbnail of the current face
                         st.image(current_face_img, width=100)
                         st.write(f"This face belongs to **{predicted_name}**")
-                        # st.session_state['selected_name'] = predicted_name
                         st.selectbox(label="Predicted name",
                                      options=sorted(st.session_state.name_options.keys()),
                                      index=sorted(st.session_state.name_options.keys()).index(predicted_name),
-                                     # key='selected_name',
+                                     key='selected_name',
                                      disabled=True
                                      )
                         # wait for a moment, user can still interrupt by unchecking auto confirm matches
-                        time.sleep(1)
+                        time.sleep(AUTO_CONFIRM_MATCHES_TIME)
                         record_name(selected_name=predicted_name)
                         st.rerun()
 
@@ -149,7 +159,7 @@ def streamlit_app():
                                                             'Select "Not a face" to skip this face.'),
                                                      options=['Not a face'] + sorted(
                                                          st.session_state.name_options.keys()),
-                                                     # key='selected_name',
+                                                     key='selected_name',
                                                      accept_new_options=True,
                                                      placeholder=None,
                                                      index=None)
@@ -167,7 +177,7 @@ def streamlit_app():
                     selected_name = st.selectbox(label=('Type in a new name or select one from the list. '
                                                         'Select "Not a face" to skip this face.'),
                                                  options=['Not a face'] + sorted(st.session_state.name_options.keys()),
-                                                 # key="selected_name",
+                                                 key="selected_name",
                                                  accept_new_options=True,
                                                  placeholder=None,
                                                  index=0
@@ -208,11 +218,13 @@ def streamlit_app():
                         export_metadata_button = st.button(label="Export Metadata")
 
                     if write_metadata_button:
+                        # write/embed metadata to original files using exiftool
                         write_metadata_with_exiftool()
 
                         st.success("Metadata saved to files! Workflow complete!", icon='✅')
 
                     elif export_metadata_button:
+                        # export metadata to a csv file next to original files
                         export_metadata_to_csv(select_folder)
 
                         st.success("Metadata exported to csv file! Workflow complete!", icon='✅')
