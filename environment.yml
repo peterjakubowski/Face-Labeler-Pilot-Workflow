@@ -12,7 +12,6 @@ dependencies:
   - python=3.10.12
   - pip:
     - streamlit==1.54.0
-    - streamlit-free-text-select==0.0.5
     - opencv-python==4.9.0.80
     - imutils==0.5.4
     - dlib==19.24.9
