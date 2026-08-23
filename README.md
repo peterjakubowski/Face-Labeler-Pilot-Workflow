@@ -16,7 +16,14 @@ The tool does not rely on any database of known faces or identities, rather it b
 
 4) Click 'Write Metadata' to save/embed the face locations (bounding boxes) and names of the person(s) shown in the image's metadata. Face locations along with names are saved in the MGW Regions List uri. Names are also saved in the XMP:EXT4 PersonInImage field.
 
-## Environment Setup, Dependencies, and Requirements
+## Installation & Setup
+
+Clone the repository
+
+```commandline
+git clone https://github.com/peterjakubowski/Face-Labeler-Pilot-Workflow.git
+cd Face-Labeler-Pilot-Workflow
+```
 
 Before configuring your environment, you should have Python 3.10.12 installed. It's highly recommended that you create a virtual environment, either using Python's built-in virtual environment or Conda virtual environment.
 
@@ -64,11 +71,9 @@ Before configuring your environment, you should have Python 3.10.12 installed. I
     The following dependencies will be installed as defined in the `requirements.txt` file:
 
     ```text
-    matplotlib==3.6.3
     numpy==1.25.2
     pandas==2.0.3
     streamlit==1.54.0
-    streamlit-free-text-select==0.0.5
     opencv-python==4.9.0.80
     imutils==0.5.4
     dlib==19.24.9
@@ -89,7 +94,6 @@ The following dependencies will be installed as defined in the environment.yml f
 python 3.10.12
 pandas 2.0.3
 streamlit 1.54.0
-streamlit-free-text-select 0.0.5
 opencv-python 4.9.0.80
 imutils 0.5.4
 numpy 1.25.2
@@ -98,7 +102,18 @@ face-recognition 1.3.0
 PyExifTool 0.5.6
 ```
 
-### Dependencies
+### Requirements
+
+| Dependency                                                     |          Category           |                                                                                                                                                                                                                                                       Primary Function & Usage in Repository |
+|:---------------------------------------------------------------|:---------------------------:|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
+| [streamlit](https://docs.streamlit.io/)                        |        UI Framework         |                                                                                                        Interactive Web Application: Serves as the web GUI framework in `app.py`. Powers the interactive dashboard, rendering image previews, labeling controls, and metadata export buttons. |
+| [face-fecognition](https://pypi.org/project/face-recognition/) |     Deep Learning / AI      |                                                                Face Detection & Embedding Extraction: Interface built on `dlib` (used in `utils/image_processing.py` and `app.py`) that locates faces in images and extracts 128-dimensional facial embedding vectors for identity matching. |
+| [dlib](https://pypi.org/project/dlib/)                         | Machine Learning Algorithms |                                                                                Underlying Vision Engine: Core C++ computer vision engine supporting face-recognition. Provides pre-trained facial landmark predictors and HOG/CNN face detectors for precise facial alignment and detection. |
+| [opencv-python](https://pypi.org/project/opencv-python/)       |      Image Processing       |                                                            Image Preprocessing & Manipulation: Utilized within `utils/image_processing.py` for reading images from disk, converting color spaces (BGR to RGB), cropping face bounding boxes $(x, y, w, h)$, and drawing visual box overlays. |
+| [imutils](https://pypi.org/project/imutils/)                   | Image Processing Utilities  |                                                                                                                                        Image Path Helper: Used in the file workflow specifically to search, filter, and extract list sequences of image file paths across input directories. |
+| [numpy](https://pypi.org/project/numpy/)                       |    Scientific Computing     |                                                                                  Image Data Structure & Math: Essential matrix backend required by opencv-python (cv2), as images are loaded and manipulated directly as multi-dimensional NumPy arrays throughout the application pipeline. |
+| [pandas](https://pypi.org/project/pandas/)                     |      Data Engineering       |                                                                                                                                                                  Interactive Table Display: Used within the Streamlit user interface to format, organize, and display structured DataFrames. |
+| [PyExifTool](https://pypi.org/project/PyExifTool/)             |          Metadata           | EXIF & XMP Metadata Writing: Python wrapper around `ExifTool` in `utils/exiftool.py` used to extract raw EXIF data and embed standardized Person Shown (PersonInImage) tags and MWG Regions (Metadata Working Group face bounding box regions and identity names) directly into image files. |
 
 ### Additional system requirements
 
@@ -111,7 +126,7 @@ Additionally, [Exiftool](https://exiftool.org/) must be installed on your system
 To launch the Streamlit server within the virtual environment, run the following command while the virtual environment is activated (in your command prompt, you should see `(.venv)` if using a Python virtual environment and `(facelabelerpilot_env)` if using conda):
 
 ```
-streamlit run face_labeler_pilot_workflow.py
+streamlit run app.py
 ```
 
 Then open http://localhost:8501
