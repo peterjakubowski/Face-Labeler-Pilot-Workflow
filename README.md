@@ -1,12 +1,12 @@
 # Face-Labeler-Pilot-Workflow
 
-Face Labeler Pilot is a Python-based workflow tool for photographers, digital asset managers, and anyone needing to tag people shown in photographs.
+Face Labeler Pilot is an interactive human-in-the-loop Python-based workflow tool for photographers, digital asset managers, and anyone needing to tag people shown in photographs.
 
 The tool is designed to assist in tagging photos from events, portrait sessions, or similar photo shoots that show the same people multiple times across many images. The tool performs best on images of people with their faces turned directly towards the camera, like in group shots and portraits.
 
 The tool does not rely on any database of known faces or identities, rather it builds a list of known faces from the currrent session only and the names entered by the user. In its essence, a user need only enter the name of an individual once, thereafter, all representations of the individual is recognized if a match is found from previously labeled faces. This makes it a great tool for labeling faces that have never been seen before and may never be seen again by the photographer or editor. It only relies on the data from the current session and learns as it iterates through the session's images.
 
-## Usage
+## Workflow Steps
 
 1) Simply add a folder of images to the `watch_folder` directory at the root of the project and select it when prompted in the workflow. Supported file types are JPEG, PNG, and TIFF.
 
@@ -16,10 +16,69 @@ The tool does not rely on any database of known faces or identities, rather it b
 
 4) Click 'Write Metadata' to save/embed the face locations (bounding boxes) and names of the person(s) shown in the image's metadata. Face locations along with names are saved in the MGW Regions List uri. Names are also saved in the XMP:EXT4 PersonInImage field.
 
-## Environment Setup and Dependencies
+## Environment Setup, Dependencies, and Requirements
 
+Before configuring your environment, you should have Python 3.10.12 installed. It's highly recommended that you create a virtual environment, either using Python's built-in virtual environment or Conda virtual environment.
 
-Create a new Conda virtual environment from the environment.yml file using the following command in your command prompt:
+### Python Virtual Environment
+
+1. #### Create a virtual environment
+
+    Navigate to the project directory and execute the built-in Python venv module:
+
+    ```commandline
+    python3 -m venv .venv
+    ```
+
+2. #### Activate the environment
+
+    You must activate the environment to ensure your terminal uses this isolated instance of Python and pip
+
+* #### macOS / Linux
+
+    ```commandline
+    source .venv/bin/activate
+    ```
+
+* #### Windows (Command Prompt)
+
+    ```commandline
+    .venv\Scripts\activate.bat
+    ```
+
+* #### Windows (PowerShell)
+
+    ```commandline
+    .venv\Scripts\Activate.ps1
+    ```
+    Once activated, your terminal prompt will show (.venv) at the beginning of the line.
+
+3. #### Install the Requirements
+
+    Make sure your terminal is in the same directory as your `requirements.txt` file, then run:
+
+    ```commandline
+    pip install -r requirements.txt
+    ```
+
+    The following dependencies will be installed as defined in the `requirements.txt` file:
+
+    ```text
+    matplotlib==3.6.3
+    numpy==1.25.2
+    pandas==2.0.3
+    streamlit==1.54.0
+    streamlit-free-text-select==0.0.5
+    opencv-python==4.9.0.80
+    imutils==0.5.4
+    dlib==19.24.9
+    face-recognition==1.3.0
+    PyExifTool==0.5.6
+   ```
+   
+### Conda Virtual Environment
+
+Alternatively, create a new Conda virtual environment from the `environment.yml` file using the following command in your command prompt:
 
 ```
 conda env update --file environment.yml --prune
@@ -29,21 +88,27 @@ The following dependencies will be installed as defined in the environment.yml f
 ```
 python 3.10.12
 pandas 2.0.3
-streamlit 1.32.2
+streamlit 1.54.0
 streamlit-free-text-select 0.0.5
 opencv-python 4.9.0.80
 imutils 0.5.4
 numpy 1.25.2
-dlib 19.23.1
+dlib 19.24.9
 face-recognition 1.3.0
 PyExifTool 0.5.6
 ```
+
+### Dependencies
+
+### Additional system requirements
+
+#### Exiftool
 
 Additionally, [Exiftool](https://exiftool.org/) must be installed on your system in order to read, write and edit metadata using [PyExifTool](https://pypi.org/project/PyExifTool/). Installation instructions can be found on the Exiftool website [here](https://exiftool.org/install.html).
 
 ## Launching the tool
 
-To launch the streamlit server within the virtual environment, run the following command while the virtual environment is activated (you should see (facelabelerpilot_env) in your command prompt):
+To launch the Streamlit server within the virtual environment, run the following command while the virtual environment is activated (in your command prompt, you should see `(.venv)` if using a Python virtual environment and `(facelabelerpilot_env)` if using conda):
 
 ```
 streamlit run face_labeler_pilot_workflow.py
