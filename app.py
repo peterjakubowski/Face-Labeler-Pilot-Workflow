@@ -20,7 +20,7 @@ from config import COMPARE_FACES_TOLERANCE, AUTO_CONFIRM_MATCHES_TIME
 
 
 def streamlit_app():
-    
+
     #       ==========================================
     # INFO: ===== Face Labeler Pilot Introduction ====
     #       ==========================================
