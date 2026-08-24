@@ -1,20 +1,38 @@
+# Face Labeler Image Viewer is a Python-based photography workflow tool
+# for viewing tagged people shown in images using Exiftool.
+#
+# Author: Peter Jakubowski
+# Date: 5/9/2024
+# Description: Streamlit app that opens a selected folder of images
+# and displays images with bounding boxes and names from
+# embedded metadata extracted using Exiftool.
+#
+#
+
 import streamlit as st
 import exiftool
 import cv2
 import os
 from imutils import paths
 from config import IMG_DIR, IMG_PREVIEW_WIDTH
+from utils.helpers import list_folders_in_watch_folder
 
 
 def streamlit_viewer_app():
 
+    st.title("Image Viewer")
+
     # list all the folders inside the watch folder
-    folder_names = [folder for folder in os.listdir(IMG_DIR) if not folder.startswith(".")]
+    # folder_names = [folder for folder in os.listdir(IMG_DIR) if not folder.startswith(".")]
+    folder_names = list_folders_in_watch_folder()
     # choose a folder with the streamlit select box
-    select_folder = st.selectbox(label='Choose a folder of images to view and label all faces.',
-                                 options=folder_names)
+    select_folder = st.selectbox(label='Choose a folder of images to view.',
+                                 options=folder_names,
+                                 accept_new_options=False,
+                                 index=None,
+                                 placeholder="Choose a folder of images")
     #
-    annotate_faces = st.button(label="Annotate Faces")
+    annotate_faces = st.button(label="View Annotated Images")
 
     if annotate_faces:
         # list file paths for all images in the selected folder
@@ -36,7 +54,7 @@ def streamlit_viewer_app():
 
                 if "XMP:RegionType" in m:
                     if type(m["XMP:RegionType"]) == str:
-                        st.write('string')
+                        # st.write('string')
                         w = int(m["XMP:RegionAreaW"] * height)
                         h = int(m["XMP:RegionAreaH"] * IMG_PREVIEW_WIDTH)
                         x = int(m["XMP:RegionAreaX"] * height)
