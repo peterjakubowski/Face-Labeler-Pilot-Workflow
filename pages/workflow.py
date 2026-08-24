@@ -8,7 +8,6 @@
 #
 #
 
-# Import necessary packages
 import pandas as pd
 import streamlit as st
 import face_recognition
@@ -19,7 +18,7 @@ from utils.csv import export_metadata_to_csv
 from config import COMPARE_FACES_TOLERANCE, AUTO_CONFIRM_MATCHES_TIME
 
 
-def streamlit_app():
+def streamlit_workflow_app():
 
     #       ==========================================
     # INFO: ===== Face Labeler Pilot Introduction ====
@@ -227,4 +226,4 @@ def streamlit_app():
                         st.success("Metadata exported to csv file! Workflow complete!", icon='✅')
 
 
-streamlit_app()  # Run the Streamlit app
+streamlit_workflow_app()  # Run the Streamlit app
