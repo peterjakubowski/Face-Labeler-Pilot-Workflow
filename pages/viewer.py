@@ -12,7 +12,6 @@
 import streamlit as st
 import exiftool
 import cv2
-import os
 from imutils import paths
 from config import IMG_DIR, IMG_PREVIEW_WIDTH
 from utils.helpers import list_folders_in_watch_folder
