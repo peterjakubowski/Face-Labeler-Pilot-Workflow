@@ -34,8 +34,8 @@ def streamlit_viewer_app():
     annotate_faces = st.button(label="View Annotated Images")
 
     if annotate_faces:
-        # list file paths for all images in the selected folder
-        image_paths = list(paths.list_images(str(IMG_DIR) + "/" + select_folder))
+        # list file paths for all images in the selected folder limit to 50
+        image_paths = list(paths.list_images(str(IMG_DIR) + "/" + select_folder))[:50]
         # read metadata from all images using exiftool
         with exiftool.ExifToolHelper() as et:
 
@@ -52,7 +52,7 @@ def streamlit_viewer_app():
                 img = cv2.resize(img, (IMG_PREVIEW_WIDTH, height), cv2.INTER_AREA)
 
                 if "XMP:RegionType" in m:
-                    if type(m["XMP:RegionType"]) == str:
+                    if isinstance(m["XMP:RegionType"], str):
                         # st.write('string')
                         w = int(m["XMP:RegionAreaW"] * height)
                         h = int(m["XMP:RegionAreaH"] * IMG_PREVIEW_WIDTH)
@@ -70,7 +70,7 @@ def streamlit_viewer_app():
                         # put text labels on the image
                         cv2.putText(img, person_shown, (x, y), cv2.FONT_HERSHEY_PLAIN, 1.3, (255, 255, 255), 2)
 
-                    elif type(m["XMP:RegionType"]) == list:
+                    elif isinstance(m["XMP:RegionType"], list):
                         # st.write('list')
                         for i in range(len(m["XMP:RegionType"])):
                             if m["XMP:RegionType"][i] == 'Face':
