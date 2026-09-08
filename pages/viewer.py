@@ -18,6 +18,7 @@ from image_utils import list_image_paths
 
 from config import IMG_DIR, IMG_PREVIEW_WIDTH
 from utils.helpers import list_folders_in_watch_folder
+from utils.image_readers import open_image
 
 
 def streamlit_viewer_app():
@@ -33,12 +34,12 @@ def streamlit_viewer_app():
                                  accept_new_options=False,
                                  index=None,
                                  placeholder="Choose a folder of images")
-    #
+    # click the button to display annotated images
     annotate_faces = st.button(label="View Annotated Images")
 
     if annotate_faces:
         # list file paths for all images in the selected folder limit to 50
-        image_paths = list(paths.list_images(str(IMG_DIR) + "/" + select_folder))[:50]
+        image_paths = list(list_image_paths(str(IMG_DIR) + "/" + select_folder))[:50]
         # read metadata from all images using exiftool
         with exiftool.ExifToolHelper() as et:
 
@@ -46,7 +47,8 @@ def streamlit_viewer_app():
 
         for m in metadata:
             if "SourceFile" in m:
-                img = cv2.imread(m["SourceFile"])
+                # img = cv2.imread(m["SourceFile"])
+                img = open_image(Path(m["SourceFile"]))
                 img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
                 img_height, img_width = img.shape[:2]
                 height = int((img_height / img_width) * IMG_PREVIEW_WIDTH)
@@ -89,11 +91,11 @@ def streamlit_viewer_app():
                                 baseline = text_size[1]
                                 # Use text size to create a black rectangle
                                 cv2.rectangle(img, (x, y - dim[1] - baseline), (x + dim[0], y + baseline), (0, 0, 0),
-                                             cv2.FILLED)
+                                              cv2.FILLED)
                                 # put text labels on the image
                                 cv2.putText(img, person_shown, (x, y), cv2.FONT_HERSHEY_PLAIN, 1.3, (255, 255, 255), 2)
 
-                st.image(img, width=800)
+                st.image(img)
 
 
 streamlit_viewer_app()
