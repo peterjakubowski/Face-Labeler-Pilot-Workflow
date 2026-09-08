@@ -20,8 +20,8 @@ def list_folders_in_watch_folder() -> list[str]:
 
 def run_face_detection_workflow(select_folder: str):
     # list all the images (paths) in the selected folder
-    st.session_state['image_paths'] = sorted(paths.list_images(os.path.join(IMG_DIR, select_folder)),
-                                             key=lambda x: x.split('/')[-1])
+    st.session_state['image_paths'] = sorted(list_image_paths(os.path.join(IMG_DIR, select_folder)),
+                                             key=lambda x: str(x).split('/')[-1])
     # detect faces in all the images, get a list/queue of faces (instances of Face class)
     st.session_state['faces_detected'] = detect_faces(img_paths=st.session_state.image_paths, img_size=IMG_SIZE)
     # count how many faces were detected
@@ -74,5 +74,3 @@ def record_name(selected_name: str) -> None:
                 st.session_state.data['names'].append(current_face.person_shown)
         # pop the current face from the queue
         st.session_state['faces_detected'].popleft()
-
-    return
