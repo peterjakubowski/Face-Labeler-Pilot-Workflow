@@ -1,46 +1,13 @@
-from models.face import Face
-import cv2
-import streamlit as st
-import face_recognition
 import time
 from collections import deque
 
+import cv2
+import face_recognition
+import streamlit as st
+from image_utils import rescale_width_height
 
-def rescale_width_height(width: int, height: int, size: int) -> tuple[int, ...]:
-    """
-    Function for rescaling the width and height
-    of an image to keep aspect ratio.
-    :param width: original image width
-    :param height: original image height
-    :param size: desired length of the longest edge in pixels.
-    :return: width (w) and height (h) of resized image.
-    """
-
-    # check if the image is vertical,
-    # height is the longest edge
-    if height > width:
-        # set height to size
-        h = size
-        # determine the ratio for resizing
-        ratio = height / size
-        # calculate new width by dividing by ratio
-        w = int(width / ratio)
-    # check if the image is horizontal,
-    # width is the longest edge
-    elif height < width:
-        # set width to size
-        w = size
-        # determine the ratio for resizing
-        ratio = width / size
-        # calculate new height by dividing by ratio
-        h = int(height / ratio)
-    # if image is not vertical or horizontal,
-    # image must be square
-    else:
-        # set width and height to size
-        w = h = size
-    # return the new width and height
-    return tuple([w, h])
+from models.face import Face
+from utils.image_readers import open_image
 
 
 def detect_faces(img_paths: list, img_size: int) -> deque:
@@ -60,9 +27,10 @@ def detect_faces(img_paths: list, img_size: int) -> deque:
     for i in range(len(img_paths)):
         # update progress
         _status_bar.progress((i + 1) / len(img_paths),
-                             text=f'({i + 1} of {len(img_paths)}) Detecting faces in {img_paths[i].split("/")[-1]}...')
+                             text=f'({i + 1} of {len(img_paths)}) Detecting faces in {str(img_paths[i]).split("/")[-1]}...')
         # open image
-        image = cv2.imread(img_paths[i])
+        # image = cv2.imread(img_paths[i])
+        image = open_image(image_path=img_paths[i])
         # convert image color from BGR to RGB
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         # resize the image for fast inference
