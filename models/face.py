@@ -50,7 +50,8 @@ class Face:
         :return: image (numpy.ndarray) cropped to the current face.
         """
 
-        img = cv2.imread(self.img_path)
+        # img = cv2.imread(self.img_path)
+        img = open_image(self.img_path)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         _W, _H, _X, _Y = self.reverse_transform_face_location(width=img.shape[1], height=img.shape[0])
         img = img[_Y:_Y + _H, _X:_X + _W]
