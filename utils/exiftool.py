@@ -1,6 +1,7 @@
-import streamlit as st
 import time
+
 import exiftool
+import streamlit as st
 
 
 def write_metadata_with_exiftool():
