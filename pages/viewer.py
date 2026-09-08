@@ -9,10 +9,13 @@
 #
 #
 
-import streamlit as st
-import exiftool
+from pathlib import Path
+
 import cv2
-from imutils import paths
+import exiftool
+import streamlit as st
+from image_utils import list_image_paths
+
 from config import IMG_DIR, IMG_PREVIEW_WIDTH
 from utils.helpers import list_folders_in_watch_folder
 
