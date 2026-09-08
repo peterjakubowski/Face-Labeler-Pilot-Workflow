@@ -1,11 +1,12 @@
-import streamlit as st
-from pathlib import Path
-from imutils import paths
-from config import IMG_DIR
 import os
-from utils.image_processing import detect_faces
-from config import IMG_SIZE
 from collections import defaultdict
+from pathlib import Path
+
+import streamlit as st
+from image_utils import list_image_paths
+
+from config import IMG_DIR, IMG_SIZE
+from utils.image_processing import detect_faces
 
 
 def list_folders_in_watch_folder() -> list[str]:
