@@ -8,14 +8,20 @@
 #
 #
 
+import time
+
+import face_recognition
 import pandas as pd
 import streamlit as st
-import face_recognition
-import time
-from utils.helpers import list_folders_in_watch_folder, run_face_detection_workflow, record_name
-from utils.exiftool import write_metadata_with_exiftool
+
+from config import AUTO_CONFIRM_MATCHES_TIME, COMPARE_FACES_TOLERANCE
 from utils.csv import export_metadata_to_csv
-from config import COMPARE_FACES_TOLERANCE, AUTO_CONFIRM_MATCHES_TIME
+from utils.exiftool import write_metadata_with_exiftool
+from utils.helpers import (
+    list_folders_in_watch_folder,
+    record_name,
+    run_face_detection_workflow,
+)
 
 
 def streamlit_workflow_app():
