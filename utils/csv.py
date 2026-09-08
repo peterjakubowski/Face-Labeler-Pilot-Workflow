@@ -1,6 +1,8 @@
-import streamlit as st
 import csv
 import os
+
+import streamlit as st
+
 from config import IMG_DIR
 
 
