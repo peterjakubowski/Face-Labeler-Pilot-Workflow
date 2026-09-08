@@ -17,6 +17,6 @@ def export_metadata_to_csv(select_folder: str):
         csv_writer.writerow(csv_columns)
         # iterate over the labeled data and write a row to the csv file for each face
         for fp, faces in st.session_state['labeled'].items():
-            filename = fp.split('/')[-1]
+            filename = str(fp).split('/')[-1]
             for face in faces:
                 csv_writer.writerow([filename, face.W, face.H, face.X, face.Y, face.person_shown])
