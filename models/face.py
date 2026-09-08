@@ -1,5 +1,7 @@
-import numpy as np
 import cv2
+import numpy as np
+
+from utils.image_readers import open_image
 
 
 class Face:
