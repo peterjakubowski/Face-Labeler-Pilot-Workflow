@@ -46,15 +46,17 @@ def detect_faces(img_paths: list[Path], img_size: int) -> deque[Face]:
                                                         num_jitters=1,
                                                         model="large")
             # update the queue with a new instance of class Face
-            q.append(Face(img_path=path,
-                          img_width=image.shape[1],
-                          img_height=image.shape[0],
-                          img_resized_width=resized_image.shape[1],
-                          img_resized_height=resized_image.shape[0],
-                          face_location=face_location,
-                          encoding=encodings
-                          )
-                     )
+            q.append(
+                Face(
+                    img_path=path,
+                    img_width=image.shape[1],
+                    img_height=image.shape[0],
+                    img_resized_width=resized_image.shape[1],
+                    img_resized_height=resized_image.shape[0],
+                    face_location=face_location,
+                    encoding=encodings
+                    )
+                )
 
     _status_bar.empty()
 
