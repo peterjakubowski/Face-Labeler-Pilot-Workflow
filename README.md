@@ -71,14 +71,14 @@ Before configuring your environment, you should have Python 3.10.12 installed. I
     The following dependencies will be installed as defined in the `requirements.txt` file:
 
     ```text
-    numpy==1.25.2
+    numpy==1.26.4
     pandas==2.0.3
     streamlit==1.54.0
     opencv-python==4.9.0.80
-    imutils==0.5.4
     dlib==19.24.9
     face-recognition==1.3.0
     PyExifTool==0.5.6
+    rawpy==0.27.1
    ```
    
 ### Conda Virtual Environment
@@ -95,25 +95,26 @@ python 3.10.12
 pandas 2.0.3
 streamlit 1.54.0
 opencv-python 4.9.0.80
-imutils 0.5.4
-numpy 1.25.2
+numpy 1.26.4
 dlib 19.24.9
 face-recognition 1.3.0
 PyExifTool 0.5.6
+rawpy 0.27.1
 ```
 
 ### Requirements
 
-| Dependency                                                     |          Category           |                                                                                                                                                                                                                                                       Primary Function & Usage in Repository |
-|:---------------------------------------------------------------|:---------------------------:|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
-| [streamlit](https://docs.streamlit.io/)                        |        UI Framework         |                                                                                                        Interactive Web Application: Serves as the web GUI framework in `app.py`. Powers the interactive dashboard, rendering image previews, labeling controls, and metadata export buttons. |
-| [face-fecognition](https://pypi.org/project/face-recognition/) |     Deep Learning / AI      |                                                                Face Detection & Embedding Extraction: Interface built on `dlib` (used in `utils/image_processing.py` and `app.py`) that locates faces in images and extracts 128-dimensional facial embedding vectors for identity matching. |
-| [dlib](https://pypi.org/project/dlib/)                         | Machine Learning Algorithms |                                                                                Underlying Vision Engine: Core C++ computer vision engine supporting face-recognition. Provides pre-trained facial landmark predictors and HOG/CNN face detectors for precise facial alignment and detection. |
-| [opencv-python](https://pypi.org/project/opencv-python/)       |      Image Processing       |                                                            Image Preprocessing & Manipulation: Utilized within `utils/image_processing.py` for reading images from disk, converting color spaces (BGR to RGB), cropping face bounding boxes $(x, y, w, h)$, and drawing visual box overlays. |
-| [imutils](https://pypi.org/project/imutils/)                   | Image Processing Utilities  |                                                                                                                                        Image Path Helper: Used in the file workflow specifically to search, filter, and extract list sequences of image file paths across input directories. |
-| [numpy](https://pypi.org/project/numpy/)                       |    Scientific Computing     |                                                                                  Image Data Structure & Math: Essential matrix backend required by opencv-python (cv2), as images are loaded and manipulated directly as multi-dimensional NumPy arrays throughout the application pipeline. |
-| [pandas](https://pypi.org/project/pandas/)                     |      Data Engineering       |                                                                                                                                                                  Interactive Table Display: Used within the Streamlit user interface to format, organize, and display structured DataFrames. |
-| [PyExifTool](https://pypi.org/project/PyExifTool/)             |          Metadata           | EXIF & XMP Metadata Writing: Python wrapper around `ExifTool` in `utils/exiftool.py` used to extract raw EXIF data and embed standardized Person Shown (PersonInImage) tags and MWG Regions (Metadata Working Group face bounding box regions and identity names) directly into image files. |
+| Dependency                                                                |          Category           |                                                                                                                                                                                                                                                       Primary Function & Usage in Repository |
+|:--------------------------------------------------------------------------|:---------------------------:|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
+| [streamlit](https://docs.streamlit.io/)                                   |        UI Framework         |                                                                                                        Interactive Web Application: Serves as the web GUI framework in `app.py`. Powers the interactive dashboard, rendering image previews, labeling controls, and metadata export buttons. |
+| [face-fecognition](https://pypi.org/project/face-recognition/)            |     Deep Learning / AI      |                                                                Face Detection & Embedding Extraction: Interface built on `dlib` (used in `utils/image_processing.py` and `app.py`) that locates faces in images and extracts 128-dimensional facial embedding vectors for identity matching. |
+| [dlib](https://pypi.org/project/dlib/)                                    | Machine Learning Algorithms |                                                                                Underlying Vision Engine: Core C++ computer vision engine supporting face-recognition. Provides pre-trained facial landmark predictors and HOG/CNN face detectors for precise facial alignment and detection. |
+| [opencv-python](https://pypi.org/project/opencv-python/)                  |      Image Processing       |                                                            Image Preprocessing & Manipulation: Utilized within `utils/image_processing.py` for reading images from disk, converting color spaces (BGR to RGB), cropping face bounding boxes $(x, y, w, h)$, and drawing visual box overlays. |
+| [image_utils](https://github.com/peterjakubowski/Image-Editing-Utilities) | Image Processing Utilities  |                                                                                                                                        Image Path Helper: Used in the file workflow specifically to search, filter, and extract list sequences of image file paths across input directories. |
+| [numpy](https://pypi.org/project/numpy/)                                  |    Scientific Computing     |                                                                                  Image Data Structure & Math: Essential matrix backend required by opencv-python (cv2), as images are loaded and manipulated directly as multi-dimensional NumPy arrays throughout the application pipeline. |
+| [pandas](https://pypi.org/project/pandas/)                                |      Data Engineering       |                                                                                                                                                                  Interactive Table Display: Used within the Streamlit user interface to format, organize, and display structured DataFrames. |
+| [PyExifTool](https://pypi.org/project/PyExifTool/)                        |          Metadata           | EXIF & XMP Metadata Writing: Python wrapper around `ExifTool` in `utils/exiftool.py` used to extract raw EXIF data and embed standardized Person Shown (PersonInImage) tags and MWG Regions (Metadata Working Group face bounding box regions and identity names) directly into image files. |
+| [rawpy](https://github.com/letmaik/rawpy)                                 |    RAW Image Processing     |                                                                                                                                                                          RAW Image Processing: Python wrapper for `libraw` used to postprocess raw image files and extract their thumbnails. |
 
 ### Additional system requirements
 
