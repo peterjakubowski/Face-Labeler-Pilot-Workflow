@@ -1,26 +1,26 @@
-import streamlit as st
-from pathlib import Path
-from imutils import paths
-from config import IMG_DIR
-import os
-from utils.image_processing import detect_faces
-from config import IMG_SIZE
 from collections import defaultdict
+from pathlib import Path
+
+import streamlit as st
+from image_utils import list_image_paths
+
+from config import IMG_DIR, IMG_SIZE
+from utils.image_processing import detect_faces
 
 
 def list_folders_in_watch_folder() -> list[str]:
     # Make the 'watch_folder' directory if it does not exist
     Path.mkdir(IMG_DIR, exist_ok=True)
     # List the subfolders of the 'watch_folder'
-    folder_names = [d for d in os.listdir(IMG_DIR) if os.path.isdir(os.path.join(IMG_DIR, d))]
+    # folder_names = [d for d in os.listdir(IMG_DIR) if os.path.isdir(os.path.join(IMG_DIR, d))]
+    folder_names = [d.name for d in IMG_DIR.iterdir() if d.is_dir()]
 
     return folder_names
 
 
 def run_face_detection_workflow(select_folder: str):
     # list all the images (paths) in the selected folder
-    st.session_state['image_paths'] = sorted(paths.list_images(os.path.join(IMG_DIR, select_folder)),
-                                             key=lambda x: x.split('/')[-1])
+    st.session_state['image_paths'] = sorted(list_image_paths(IMG_DIR / select_folder), key=lambda x: x.name)
     # detect faces in all the images, get a list/queue of faces (instances of Face class)
     st.session_state['faces_detected'] = detect_faces(img_paths=st.session_state.image_paths, img_size=IMG_SIZE)
     # count how many faces were detected
@@ -73,5 +73,3 @@ def record_name(selected_name: str) -> None:
                 st.session_state.data['names'].append(current_face.person_shown)
         # pop the current face from the queue
         st.session_state['faces_detected'].popleft()
-
-    return

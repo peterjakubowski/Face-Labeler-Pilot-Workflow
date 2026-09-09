@@ -1,5 +1,9 @@
-import numpy as np
+from pathlib import Path
+
 import cv2
+import numpy as np
+
+from utils.image_readers import open_image
 
 
 class Face:
@@ -8,7 +12,7 @@ class Face:
     """
 
     def __init__(self,
-                 img_path: str,
+                 img_path: Path,
                  img_width: int,
                  img_height: int,
                  img_resized_width: int,
@@ -48,7 +52,8 @@ class Face:
         :return: image (numpy.ndarray) cropped to the current face.
         """
 
-        img = cv2.imread(self.img_path)
+        # img = cv2.imread(self.img_path)
+        img = open_image(self.img_path)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         _W, _H, _X, _Y = self.reverse_transform_face_location(width=img.shape[1], height=img.shape[0])
         img = img[_Y:_Y + _H, _X:_X + _W]
@@ -70,7 +75,6 @@ class Face:
         self.H = round((bottom - top) / img_w, 4)
         self.X = round(left / img_h, 4)
         self.Y = round(top / img_w, 4)
-        return
 
     def reverse_transform_face_location(self, width: int, height: int) -> tuple[int, ...]:
         """
@@ -91,4 +95,4 @@ class Face:
         _H = int(self.H * width)
         _X = int(self.X * height)
         _Y = int(self.Y * width)
-        return tuple([_W, _H, _X, _Y])
+        return _W, _H, _X, _Y

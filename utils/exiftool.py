@@ -1,6 +1,7 @@
-import streamlit as st
 import time
+
 import exiftool
+import streamlit as st
 
 
 def write_metadata_with_exiftool():
@@ -10,7 +11,7 @@ def write_metadata_with_exiftool():
     for j, (image_path, faces) in enumerate(st.session_state.labeled.items()):
         status_bar.progress(
             (j + 1) / n,
-            text=f'({j + 1} of {n}) Writing metadata to {image_path.split("/")[-1]}...'
+            text=f'({j + 1} of {n}) Writing metadata to {image_path.name}'
         )
         for i, face in enumerate(faces):
             # use exiftool to save metadata to files
