@@ -62,44 +62,18 @@ Before configuring your environment, you should have Python 3.10.12 installed. I
 
 3. #### Install the Requirements
 
-    Make sure your terminal is in the same directory as your `requirements.txt` file, then run:
+    Make sure your terminal is in the same directory as your `requirements.txt` file, then run the following command to install all dependencies:
 
     ```commandline
     pip install -r requirements.txt
     ```
-
-    The following dependencies will be installed as defined in the `requirements.txt` file:
-
-    ```text
-    numpy==1.26.4
-    pandas==2.0.3
-    streamlit==1.54.0
-    opencv-python==4.9.0.80
-    dlib==19.24.9
-    face-recognition==1.3.0
-    PyExifTool==0.5.6
-    rawpy==0.27.1
-   ```
    
 ### Conda Virtual Environment
 
-Alternatively, create a new Conda virtual environment from the `environment.yml` file using the following command in your command prompt:
+Alternatively, if you're using Conda, create a new Conda virtual environment from the `environment.yml` file using the following command in your command prompt. This will create a new environment and install all dependencies:
 
-```
+```commandline
 conda env update --file environment.yml --prune
-```
-The following dependencies will be installed as defined in the environment.yml file:
-
-```
-python 3.10.12
-pandas 2.0.3
-streamlit 1.54.0
-opencv-python 4.9.0.80
-numpy 1.26.4
-dlib 19.24.9
-face-recognition 1.3.0
-PyExifTool 0.5.6
-rawpy 0.27.1
 ```
 
 ### Requirements
