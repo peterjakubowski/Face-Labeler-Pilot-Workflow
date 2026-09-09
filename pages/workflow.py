@@ -191,45 +191,44 @@ def streamlit_workflow_app():
                         st.rerun()
 
         # if our queue of faces is empty, check if we have labeled any images
-        if not st.session_state['faces_detected']:
+        if not st.session_state['faces_detected'] and 'labeled' in st.session_state:
             # if we have labeled data, let's embed the face locations and names in the image metadata
-            if 'labeled' in st.session_state:
-                if not st.session_state['labeled']:
-                    st.success(f'{len(st.session_state.labeled)} faces were labeled. Workflow complete!',
-                               icon='✅')
-                elif st.session_state['labeled']:
-                    st.success('All faces have been labeled!', icon='✅')
+            if not st.session_state['labeled']:
+                st.success(f'{len(st.session_state.labeled)} faces were labeled. Workflow complete!',
+                           icon='✅')
+            elif st.session_state['labeled']:
+                st.success('All faces have been labeled!', icon='✅')
 
-                    # display a dataframe with counts of unique names/labels
-                    df = pd.DataFrame(data=st.session_state.name_options.items(),
-                                      columns=['names', 'counts'])
-                    df.set_index('names', inplace=True)
-                    st.dataframe(df.sort_index())
+                # display a dataframe with counts of unique names/labels
+                df = pd.DataFrame(data=st.session_state.name_options.items(),
+                                  columns=['names', 'counts'])
+                df.set_index('names', inplace=True)
+                st.dataframe(df.sort_index())
 
-                    #       ==================================================
-                    # INFO: ===== Begin Step 3: Write/Save/Embed Metadata ====
-                    #       ==================================================
+                #       ==================================================
+                # INFO: ===== Begin Step 3: Write/Save/Embed Metadata ====
+                #       ==================================================
 
-                    st.subheader("Step 3: Save Metadata", divider="gray")
+                st.subheader("Step 3: Save Metadata", divider="gray")
 
-                    # created columns for buttons to display side-by-side
-                    col1, col2, _, _ = st.columns(4)
-                    with col1:
-                        write_metadata_button = st.button(label="Write Metadata")
-                    with col2:
-                        export_metadata_button = st.button(label="Export Metadata")
+                # created columns for buttons to display side-by-side
+                col1, col2, _, _ = st.columns(4)
+                with col1:
+                    write_metadata_button = st.button(label="Write Metadata")
+                with col2:
+                    export_metadata_button = st.button(label="Export Metadata")
 
-                    if write_metadata_button:
-                        # write/embed metadata to original files using exiftool
-                        write_metadata_with_exiftool()
+                if write_metadata_button:
+                    # write/embed metadata to original files using exiftool
+                    write_metadata_with_exiftool()
 
-                        st.success("Metadata saved to files! Workflow complete!", icon='✅')
+                    st.success("Metadata saved to files! Workflow complete!", icon='✅')
 
-                    elif export_metadata_button:
-                        # export metadata to a csv file next to original files
-                        export_metadata_to_csv(select_folder)
+                elif export_metadata_button:
+                    # export metadata to a csv file next to original files
+                    export_metadata_to_csv(select_folder)
 
-                        st.success("Metadata exported to csv file! Workflow complete!", icon='✅')
+                    st.success("Metadata exported to csv file! Workflow complete!", icon='✅')
 
 
 streamlit_workflow_app()  # Run the Streamlit app
