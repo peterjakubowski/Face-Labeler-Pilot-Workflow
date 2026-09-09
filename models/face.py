@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import cv2
 import numpy as np
 
@@ -10,7 +12,7 @@ class Face:
     """
 
     def __init__(self,
-                 img_path: str,
+                 img_path: Path,
                  img_width: int,
                  img_height: int,
                  img_resized_width: int,
@@ -73,7 +75,6 @@ class Face:
         self.H = round((bottom - top) / img_w, 4)
         self.X = round(left / img_h, 4)
         self.Y = round(top / img_w, 4)
-        return
 
     def reverse_transform_face_location(self, width: int, height: int) -> tuple[int, ...]:
         """
@@ -94,4 +95,4 @@ class Face:
         _H = int(self.H * width)
         _X = int(self.X * height)
         _Y = int(self.Y * width)
-        return tuple([_W, _H, _X, _Y])
+        return _W, _H, _X, _Y
