@@ -25,7 +25,9 @@ git clone https://github.com/peterjakubowski/Face-Labeler-Pilot-Workflow.git
 cd Face-Labeler-Pilot-Workflow
 ```
 
-Before configuring your environment, you should have Python 3.10.12 installed. It's highly recommended that you create a virtual environment, either using Python's built-in virtual environment or Conda virtual environment.
+Before configuring your environment, you should have Python 3.10.12 installed. 
+
+It's highly recommended that you create a virtual environment, either using Python's built-in virtual environment or Conda virtual environment.
 
 ### Python Virtual Environment
 
