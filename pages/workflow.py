@@ -87,8 +87,8 @@ def streamlit_workflow_app():
             auto_confirm_matches = st.checkbox(label="Auto confirm matches?",
                                                value=False,
                                                key='auto_confirm_matches')
-            status_bar = st.progress(st.session_state.face_i / st.session_state.faces_count,
-                                     text=f'Labeling face {st.session_state.face_i} of {st.session_state.faces_count}')
+            st.progress(st.session_state.face_i / st.session_state.faces_count,
+                        text=f'Labeling face {st.session_state.face_i} of {st.session_state.faces_count}')
             # pop the next face from the queue
             current_face = st.session_state['faces_detected'][0]
             # open cropped image of current face
