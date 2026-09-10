@@ -4,7 +4,7 @@ from pathlib import Path
 import streamlit as st
 from image_utils import list_image_paths
 
-from config import IMG_DIR, IMG_SIZE
+from config import IMG_DIR
 from utils.image_processing import detect_faces
 
 
@@ -22,7 +22,7 @@ def run_face_detection_workflow(select_folder: str):
     # list all the images (paths) in the selected folder
     st.session_state['image_paths'] = sorted(list_image_paths(IMG_DIR / select_folder), key=lambda x: x.name)
     # detect faces in all the images, get a list/queue of faces (instances of Face class)
-    st.session_state['faces_detected'] = detect_faces(img_paths=st.session_state.image_paths, img_size=IMG_SIZE)
+    st.session_state['faces_detected'] = detect_faces(img_paths=st.session_state.image_paths)
     # count how many faces were detected
     st.session_state['faces_count'] = len(st.session_state.faces_detected)
     # if we didn't detect any faces, delete the queue from the session state and display a message
