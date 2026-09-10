@@ -8,7 +8,7 @@ The tool does not rely on any database of known faces or identities, rather it b
 
 ## Workflow Steps
 
-1) Simply add a folder of images to the `watch_folder` directory at the root of the project and select it when prompted in the workflow. Supported file types are JPEG, PNG, and TIFF.
+1) Simply add a folder of images to the `watch_folder` directory at the root of the project and select it when prompted in the workflow. Supported file types are JPEG, PNG, TIFF, CR2, DNG, and NEF.
 
 2) Click 'Detect Faces' to iterate over the images and let the face detection model get the all the face locations and face encodings.
 
