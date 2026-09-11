@@ -7,6 +7,13 @@ import streamlit as st
 from models.face import Face
 
 
+def extract_metadata_from_files_with_exiftool(image_paths: list[Path]) -> list[dict]:
+    with exiftool.ExifToolHelper() as et:
+        metadata = et.get_metadata(image_paths)
+
+    return metadata
+
+
 def get_tags_with_exiftool(image_path: Path) -> dict:
     with exiftool.ExifToolHelper() as et:
         tags = et.get_tags(
