@@ -11,14 +11,16 @@
 
 from pathlib import Path
 
-import cv2
-import exiftool
 import streamlit as st
 from image_utils import list_image_paths
 
 from config import IMG_DIR, IMG_PREVIEW_WIDTH
+from utils.exiftool import extract_metadata_from_files_with_exiftool
 from utils.helpers import list_folders_in_watch_folder
-from utils.image_readers import open_image
+from utils.image_processing import (
+    annotate_image_with_face_region_using_opencv,
+    prepare_image_for_inference,
+)
 
 
 def streamlit_viewer_app():
@@ -41,60 +43,40 @@ def streamlit_viewer_app():
         # list file paths for all images in the selected folder limit to 50
         image_paths = list(list_image_paths(str(IMG_DIR) + "/" + select_folder))[:50]
         # read metadata from all images using exiftool
-        with exiftool.ExifToolHelper() as et:
-
-            metadata = et.get_metadata(image_paths)
-
+        metadata = extract_metadata_from_files_with_exiftool(image_paths)
+        # iterate through each image metadata
         for m in metadata:
+            # check if our metadata has a path to the source file
             if "SourceFile" in m:
-                # img = cv2.imread(m["SourceFile"])
-                img = open_image(Path(m["SourceFile"]))
-                img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-                img_height, img_width = img.shape[:2]
-                height = int((img_height / img_width) * IMG_PREVIEW_WIDTH)
-                # st.write(img_width, img_height)
-                # st.write(WIDTH, height)
-                img = cv2.resize(img, (IMG_PREVIEW_WIDTH, height), cv2.INTER_AREA)
-
+                # open an image to annotate
+                _, img = prepare_image_for_inference(image_path=Path(m["SourceFile"]), img_size=IMG_PREVIEW_WIDTH)
+                width = img.shape[1]
+                height = img.shape[0]
+                # check if there is a region to annotate
                 if "XMP:RegionType" in m:
-                    if isinstance(m["XMP:RegionType"], str):
-                        # st.write('string')
-                        w = int(m["XMP:RegionAreaW"] * height)
-                        h = int(m["XMP:RegionAreaH"] * IMG_PREVIEW_WIDTH)
-                        x = int(m["XMP:RegionAreaX"] * height)
-                        y = int(m["XMP:RegionAreaY"] * IMG_PREVIEW_WIDTH)
-                        person_shown = m["XMP:RegionName"]
-                        cv2.rectangle(img, (x, y), (x + w, y + h), (255, 255, 255), 2)
-                        # get text size
-                        text_size = cv2.getTextSize(person_shown, cv2.FONT_HERSHEY_PLAIN, 1.3, 2)
-                        dim = text_size[0]
-                        baseline = text_size[1]
-                        # Use text size to create a black rectangle
-                        cv2.rectangle(img, (x, y - dim[1] - baseline), (x + dim[0], y + baseline), (0, 0, 0),
-                                      cv2.FILLED)
-                        # put text labels on the image
-                        cv2.putText(img, person_shown, (x, y), cv2.FONT_HERSHEY_PLAIN, 1.3, (255, 255, 255), 2)
-
+                    # if our region type is a str, there is one region
+                    if isinstance(m["XMP:RegionType"], str) and m["XMP:RegionType"] == 'Face':
+                        img = annotate_image_with_face_region_using_opencv(
+                            img=img,
+                            person_shown=m["XMP:RegionName"],
+                            w=int(m["XMP:RegionAreaW"] * height),
+                            h=int(m["XMP:RegionAreaH"] * width),
+                            x=int(m["XMP:RegionAreaX"] * height),
+                            y=int(m["XMP:RegionAreaY"] * width)
+                        )
+                    # if our region is a list, there are multiple regions
                     elif isinstance(m["XMP:RegionType"], list):
-                        # st.write('list')
+                        # iterate over all regions
                         for i in range(len(m["XMP:RegionType"])):
                             if m["XMP:RegionType"][i] == 'Face':
-                                w = int(m["XMP:RegionAreaW"][i] * height)
-                                h = int(m["XMP:RegionAreaH"][i] * IMG_PREVIEW_WIDTH)
-                                x = int(m["XMP:RegionAreaX"][i] * height)
-                                y = int(m["XMP:RegionAreaY"][i] * IMG_PREVIEW_WIDTH)
-                                person_shown = m["XMP:RegionName"][i]
-                                cv2.rectangle(img, (x, y), (x+w, y+h), (255, 255, 255), 2)
-                                # get text size
-                                text_size = cv2.getTextSize(person_shown, cv2.FONT_HERSHEY_PLAIN, 1.3, 2)
-                                dim = text_size[0]
-                                baseline = text_size[1]
-                                # Use text size to create a black rectangle
-                                cv2.rectangle(img, (x, y - dim[1] - baseline), (x + dim[0], y + baseline), (0, 0, 0),
-                                              cv2.FILLED)
-                                # put text labels on the image
-                                cv2.putText(img, person_shown, (x, y), cv2.FONT_HERSHEY_PLAIN, 1.3, (255, 255, 255), 2)
-
+                                img = annotate_image_with_face_region_using_opencv(
+                                    img=img,
+                                    person_shown=m["XMP:RegionName"][i],
+                                    w=int(m["XMP:RegionAreaW"][i] * height),
+                                    h=int(m["XMP:RegionAreaH"][i] * width),
+                                    x=int(m["XMP:RegionAreaX"][i] * height),
+                                    y=int(m["XMP:RegionAreaY"][i] * width)
+                                )
                 st.image(img)
 
 
