@@ -8,7 +8,7 @@ import numpy as np
 import streamlit as st
 from image_utils import rescale_width_height
 
-from config import IMG_SIZE
+from config import IMG_PREVIEW_WIDTH, IMG_SIZE
 from models.face import Face
 from utils.image_readers import open_image
 
@@ -33,6 +33,52 @@ def prepare_image_for_inference(image_path: Path, img_size: int = IMG_SIZE) -> t
     resized_image = cv2.resize(image, dsize=(_w, _h), interpolation=cv2.INTER_AREA)
 
     return image.shape, resized_image
+
+
+def prepare_image_for_annotation(image_path: Path) -> np.ndarray:
+
+    # img = cv2.imread(m["SourceFile"])
+    img = open_image(image_path)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    img_height, img_width = img.shape[:2]
+    height = int((img_height / img_width) * IMG_PREVIEW_WIDTH)
+    img = cv2.resize(img, dsize=(IMG_PREVIEW_WIDTH, height), interpolation=cv2.INTER_AREA)
+
+    return img
+
+
+def annotate_image_with_face_region_using_opencv(img: np.ndarray, person_shown: str, w: int, h: int, x: int, y: int) -> np.ndarray:
+    """
+    Annotate an image by surrounding a face region with a bounding box and label.
+
+    :param img: Image as numpy array
+    :param person_shown: Person (face) shown in the image region
+    :param w: XMP Region Area W
+    :param h: XMP Region Area H
+    :param x: XMP Region Area X
+    :param y: XMP Region Area Y
+    :return: Image as numpy array
+    """
+
+    cv2.rectangle(img, (x, y), (x + w, y + h), (255, 255, 255), 2)
+    # get text size
+    text_size = cv2.getTextSize(person_shown, cv2.FONT_HERSHEY_PLAIN, 1.3, 2)
+    dim = text_size[0]
+    baseline = text_size[1]
+    # Use text size to create a black rectangle
+    cv2.rectangle(
+        img,
+        (x, y - dim[1] - baseline),
+        (x + dim[0], y + baseline),
+        (0, 0, 0),
+        cv2.FILLED,
+    )
+    # put text labels on the image
+    cv2.putText(
+        img, person_shown, (x, y), cv2.FONT_HERSHEY_PLAIN, 1.3, (255, 255, 255), 2
+    )
+
+    return img
 
 
 def detect_faces(img_paths: list[Path]) -> deque[Face]:
