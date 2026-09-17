@@ -19,6 +19,13 @@ class FaceClassifierKNN(BaseConnection[dict]):
 
         return self._instance.get('embeddings') is not None
 
+    def info(self) -> str:
+        number_of_embeddings = self._instance.get('embeddings', np.empty(0)).shape[0]
+        number_of_unique_names = np.unique(self._instance.get('names', np.empty(0))).shape[0]
+
+        return (f"Face classifier contains **{number_of_embeddings}** total embeddings "
+                f"and **{number_of_unique_names}** unique names")
+
     def load_reference_data(self, reference_data: list[dict]):
 
         embeddings = []
