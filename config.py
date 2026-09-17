@@ -5,3 +5,4 @@ IMG_DIR: Path = Path("watch_folder")  # Set the path to the 'watch_folder' direc
 COMPARE_FACES_TOLERANCE = 0.55  # the lower the tolerance, the more sensitive the algorithm is at matching faces
 AUTO_CONFIRM_MATCHES_TIME = 1  # Number of seconds to wait before submitting predicted name
 IMG_PREVIEW_WIDTH = 1500
+TOP_K = 5  # K nearest neighbors to return when calculating distance between labeled face embeddings and unlabeled
