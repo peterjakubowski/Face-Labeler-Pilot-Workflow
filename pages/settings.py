@@ -38,7 +38,7 @@ threshold_input = st.number_input(
     )
 )
 
-if top_k_input != st.session_state.get('top_k') or threshold_input != st.session_state.get('threshold'):
+if top_k_input != st.session_state.get('top_k', TOP_K) or threshold_input != st.session_state.get('threshold', COMPARE_FACES_TOLERANCE):
     save_settings_button = st.button("Save settings")
 
     if save_settings_button:
@@ -55,26 +55,30 @@ if not face_conn.is_initialized():
             st.rerun()
 
 else:
-    select_options = [reference_data[i].get('name') for i in range(5)]
+    st.write(face_conn.info())
 
-    select_name = st.selectbox(label="select_box", options=select_options)
+    # select_options = [reference_data[i].get('name') for i in range(5)]
+    #
+    # select_name = st.selectbox(label="select_box", options=select_options)
+    #
+    # select_name_index = int(select_name.split(" ")[-1]) - 1
+    #
+    # test_embedding = reference_data[select_name_index].get("embedding") * 0.95
+    #
+    # prediction, confidence = face_conn.predict(
+    #     test_embedding,
+    #     k=st.session_state.get('top_k', TOP_K),
+    #     threshold=st.session_state.get('threshold', COMPARE_FACES_TOLERANCE))
+    #
+    # st.write(prediction)
+    #
+    # st.write(confidence)
 
-    select_name_index = int(select_name.split(" ")[-1]) - 1
-
-    test_embedding = reference_data[select_name_index].get("embedding") * 0.95
-
-    prediction, confidence = face_conn.predict(
-        test_embedding,
-        k=st.session_state.get('top_k', TOP_K),
-        threshold=st.session_state.get('threshold', COMPARE_FACES_TOLERANCE))
-
-    st.write(prediction)
-
-    st.write(confidence)
-
-    reset_button = st.button("Reset")
+    reset_button = st.button("Reset Face Classifier")
     if reset_button:
         face_conn.reset()
-        del st.session_state['top_k']
-        del st.session_state['threshold']
+        if 'top_k' in st.session_state:
+            del st.session_state['top_k']
+        if 'threshold' in st.session_state:
+            del st.session_state['threshold']
         st.rerun()
