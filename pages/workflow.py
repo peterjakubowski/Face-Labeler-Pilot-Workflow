@@ -132,7 +132,7 @@ def streamlit_workflow_app():
                             # display a thumbnail of the current face
                             st.image(current_face_img, width=100)
 
-                            st.write(f'I think this face belongs to **{predicted_name}**, can you confirm?')
+                            st.write(f'I think this face belongs to **{predicted_name}**, ({confidence_percentage}%) can you confirm?')
                             selected_name = st.selectbox(label=('The predicted name has been pre-selected, '
                                                                 'click the submit button to confirm.\n\n'
                                                                 'Select "Not a face" to skip this face.\n\n'
@@ -153,7 +153,7 @@ def streamlit_workflow_app():
                     elif auto_confirm_matches:
                         # display a thumbnail of the current face
                         st.image(current_face_img, width=100)
-                        st.write(f"This face belongs to **{predicted_name}**")
+                        st.write(f"This face belongs to **{predicted_name}** ({confidence_percentage}%)")
                         st.selectbox(label="Predicted name",
                                      options=sorted(st.session_state.name_options.keys()),
                                      index=sorted(st.session_state.name_options.keys()).index(predicted_name),
