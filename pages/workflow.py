@@ -102,19 +102,23 @@ def streamlit_workflow_app():
                 #       ==============================================
 
                 # compare the face encoding to existing encodings to see if we can find a match
-                # note: the lower the tolerance, the more sensitive the algorithm is at matching faces
-                matches = face_recognition.compare_faces(st.session_state.data['encodings'],
-                                                         current_face.encoding[0],
-                                                         tolerance=COMPARE_FACES_TOLERANCE)
-
-                if True in matches:
-                    # count matches and find the name with the most matches
-                    matched_indices = [i for (i, b) in enumerate(matches) if b]
-                    count = {}
-                    for i in matched_indices:
-                        name = st.session_state.data['names'][i]
-                        count[name] = count.get(name, 0) + 1
-                    predicted_name = max(count, key=count.get)
+                # note: the lower the tolerance/threshold, the more sensitive the algorithm is at matching faces
+                predicted_name, confidence_percentage = face_conn.predict(
+                    embedding=current_face.encoding[0],
+                    k=int(st.session_state.get('top_k', TOP_K)),
+                    threshold=float(st.session_state.get('threshold', COMPARE_FACES_TOLERANCE))
+                )
+                if predicted_name == "Unknown face":
+                    with st.form(key="new_face_form", clear_on_submit=True):
+                        # display a thumbnail of the current face
+                        st.image(current_face_img, width=100)
+                        st.write("I don't recognize this face, who is this?")
+                        selected_name = st.selectbox(label=('Type in a new name or select one from the list. '
+                                                            'Select "Not a face" to skip this face.'),
+                                                     options=['Not a face'] + face_conn.unique_names(),
+                                                     accept_new_options=True,
+                                                     placeholder=None,
+                                                     index=None)
 
                     # if auto confirm matches is not checked, then provide a form to label the current face
                     if not auto_confirm_matches:
