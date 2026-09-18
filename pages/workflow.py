@@ -16,6 +16,7 @@ import streamlit as st
 from config import AUTO_CONFIRM_MATCHES_TIME, COMPARE_FACES_TOLERANCE, TOP_K
 from utils.csv import export_metadata_to_csv
 from utils.exiftool import write_metadata_with_exiftool
+from utils.face_classifier import face_conn
 from utils.helpers import (
     list_folders_in_watch_folder,
     record_name,
