@@ -10,7 +10,6 @@
 
 import time
 
-import face_recognition
 import pandas as pd
 import streamlit as st
 
