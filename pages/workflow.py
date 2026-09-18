@@ -137,10 +137,8 @@ def streamlit_workflow_app():
                                                                 'click the submit button to confirm.\n\n'
                                                                 'Select "Not a face" to skip this face.\n\n'
                                                                 'Or, add or select someone else.\n'),
-                                                         options=['Not a face'] + sorted(
-                                                             st.session_state.name_options.keys()),
-                                                         index=sorted(st.session_state.name_options.keys()).index(
-                                                             predicted_name) + 1,
+                                                         options=['Not a face'] + sorted(face_conn.unique_names()),
+                                                         index=face_conn.unique_names().index(predicted_name) + 1,
                                                          accept_new_options=True,
                                                          placeholder=None)
 
@@ -155,8 +153,8 @@ def streamlit_workflow_app():
                         st.image(current_face_img, width=100)
                         st.write(f"This face belongs to **{predicted_name}** ({confidence_percentage}%)")
                         st.selectbox(label="Predicted name",
-                                     options=sorted(st.session_state.name_options.keys()),
-                                     index=sorted(st.session_state.name_options.keys()).index(predicted_name),
+                                     options=face_conn.unique_names(),
+                                     index=face_conn.unique_names().index(predicted_name),
                                      disabled=True
                                      )
                         # wait for a moment, user can still interrupt by unchecking auto confirm matches
@@ -171,7 +169,7 @@ def streamlit_workflow_app():
                     st.write('This face has no encoding. Is this a face?')
                     selected_name = st.selectbox(label=('Type in a new name or select one from the list. '
                                                         'Select "Not a face" to skip this face.'),
-                                                 options=['Not a face'] + sorted(st.session_state.name_options.keys()),
+                                                 options=['Not a face'] + face_conn.unique_names(),
                                                  accept_new_options=True,
                                                  placeholder=None,
                                                  index=0
