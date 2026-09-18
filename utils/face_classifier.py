@@ -16,14 +16,26 @@ class FaceClassifierKNN(BaseConnection[dict]):
                 }
 
     def is_initialized(self) -> bool:
+        """
+        Check if the list of embeddings has been created.
+        :return: True or False
+        """
 
         return self._instance.get('embeddings') is not None
 
     def info(self) -> str:
+        """
+        Returns a string of summary text about the face classifier with counts of embeddings and unique names.
+        :return: String of summary statistics
+        """
+
+        if self._instance.get('embeddings') is None:
+            return ""
+
         number_of_embeddings = self._instance.get('embeddings', np.empty(0)).shape[0]
         number_of_unique_names = np.unique(self._instance.get('names', np.empty(0))).shape[0]
 
-        return (f"Face classifier contains **{number_of_embeddings}** total embeddings "
+        return (f"Face classifier contains **{number_of_embeddings}** total face embeddings "
                 f"and **{number_of_unique_names}** unique names")
 
     def is_in(self, embedding: np.ndarray) -> bool:
@@ -53,6 +65,11 @@ class FaceClassifierKNN(BaseConnection[dict]):
         return sorted(np.unique(names))
 
     def load_reference_data(self, reference_data: list[dict]):
+        """
+        Loads the reference data (labeled faces/embeddings) into the face classifier.
+        :param reference_data: List of dictionaries with names and embeddings.
+        :return:
+        """
 
         embeddings = []
         names = []
@@ -68,10 +85,16 @@ class FaceClassifierKNN(BaseConnection[dict]):
         self._instance['names'] = np.array(names, dtype=str)
 
     def add_new_face(self, person_shown: str, embedding: np.ndarray):
+        """
+        Adds a new face or identity to the face classifier.
+        :param person_shown: The name of the person shown
+        :param embedding: The embedding of the face
+        :return:
+        """
 
         new_embedding = np.asarray(embedding, dtype=np.float32)
 
-        if self._instance.get('embeddings', None):
+        if self._instance.get('embeddings') is None:
             self._instance['embeddings'] = np.array([new_embedding], dtype=np.float32)
             self._instance['names'] = np.array([person_shown], dtype=str)
             return
@@ -80,18 +103,27 @@ class FaceClassifierKNN(BaseConnection[dict]):
         self._instance['names'] = np.append(self._instance.get('names'), person_shown)
 
     def predict(self, embedding: np.ndarray, k: int = TOP_K, threshold: float = COMPARE_FACES_TOLERANCE) -> tuple[str, float]:
+        """
+        Predicts the name of an unidentified face using the face classifier.
+        Compares an unknown embedding against a list of labeled embeddings to find
+        the nearest neighbors, casts weighted votes based on distance, and returns
+        the predicted name along with a confidence percentage.
+        :param embedding: The face embedding to identify.
+        :param k: The number of nearest neighbors to include in the vote.
+        :param threshold: The maximum distance a neighbor can be to be considered.
+        :return: Tuple with predicted name and confidence percentage
+        """
 
         unidentified_face_embedding = np.asarray(embedding, dtype=np.float32)
 
-        known_face_embeddings = np.asarray(self._instance.get('embeddings', np.empty(0)), dtype=np.float32)
+        known_face_embeddings = self._instance.get('embeddings', None)
 
-        if known_face_embeddings.shape[0] < 1:
+        if known_face_embeddings is None:
             return "Unknown face", 0.0
 
         distances = np.linalg.norm(known_face_embeddings - unidentified_face_embedding, axis=1)
 
-        top_k_indices = np.argpartition(distances, kth=k)[:k]
-        top_k_indices = top_k_indices[np.argsort(distances[top_k_indices])]
+        top_k_indices = np.argsort(distances)[:k]
 
         neighbor_distances = distances[top_k_indices]
         neighbor_names = self._instance.get('names')[top_k_indices]
