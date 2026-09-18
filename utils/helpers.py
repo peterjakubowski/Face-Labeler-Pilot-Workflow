@@ -67,8 +67,9 @@ def record_name(selected_name: str) -> None:
             st.session_state.labeled[str(current_face.img_path)].append(current_face)
             # if the current face has an encoding, append it along with the name
             # to the list of encodings and names for future face recognitions
-            if len(current_face.encoding) > 0:
-                st.session_state.data['encodings'].append(current_face.encoding[0])
-                st.session_state.data['names'].append(current_face.person_shown)
+            if len(current_face.encoding) > 0 and not face_conn.is_in(current_face.encoding[0]):
+                # add new face to the face classifier if we don't already have a similar record
+                face_conn.add_new_face(current_face.person_shown, current_face.encoding[0])
+
         # pop the current face from the queue
         st.session_state['faces_detected'].popleft()
