@@ -64,7 +64,7 @@ def record_name(selected_name: str) -> None:
             st.session_state.name_options[current_face.person_shown] += 1
             st.session_state.face_i += 1
             # add the current face to the dictionary of labeled faces
-            st.session_state.labeled[current_face.img_path].append(current_face)
+            st.session_state.labeled[str(current_face.img_path)].append(current_face)
             # if the current face has an encoding, append it along with the name
             # to the list of encodings and names for future face recognitions
             if len(current_face.encoding) > 0:
