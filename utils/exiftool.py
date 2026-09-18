@@ -63,6 +63,7 @@ def write_metadata_with_exiftool():
     time.sleep(1)
     n = len(st.session_state.labeled)
     for j, (image_path, faces) in enumerate(st.session_state.labeled.items()):
+        image_path = Path(image_path)
         # update our progress
         status_bar.progress(
             (j + 1) / n,
