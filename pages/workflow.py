@@ -121,6 +121,11 @@ def streamlit_workflow_app():
                                                      placeholder=None,
                                                      index=None)
 
+                        submitted = st.form_submit_button(label='Submit')
+                        if submitted:
+                            record_name(selected_name=selected_name)
+                            st.rerun()
+                else:
                     # if auto confirm matches is not checked, then provide a form to label the current face
                     if not auto_confirm_matches:
                         with st.form(key="predicted_name_form", clear_on_submit=True):
