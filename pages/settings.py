@@ -57,23 +57,6 @@ if not face_conn.is_initialized():
 else:
     st.write(face_conn.info())
 
-    # select_options = [reference_data[i].get('name') for i in range(5)]
-    #
-    # select_name = st.selectbox(label="select_box", options=select_options)
-    #
-    # select_name_index = int(select_name.split(" ")[-1]) - 1
-    #
-    # test_embedding = reference_data[select_name_index].get("embedding") * 0.95
-    #
-    # prediction, confidence = face_conn.predict(
-    #     test_embedding,
-    #     k=st.session_state.get('top_k', TOP_K),
-    #     threshold=st.session_state.get('threshold', COMPARE_FACES_TOLERANCE))
-    #
-    # st.write(prediction)
-    #
-    # st.write(confidence)
-
     reset_button = st.button("Reset Face Classifier")
     if reset_button:
         face_conn.reset()
