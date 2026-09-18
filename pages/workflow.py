@@ -159,24 +159,6 @@ def streamlit_workflow_app():
                         record_name(selected_name=predicted_name)
                         st.rerun()
 
-                else:
-                    with st.form(key="new_face_form", clear_on_submit=True):
-                        # display a thumbnail of the current face
-                        st.image(current_face_img, width=100)
-                        st.write("I don't recognize this face, who is this?")
-                        selected_name = st.selectbox(label=('Type in a new name or select one from the list. '
-                                                            'Select "Not a face" to skip this face.'),
-                                                     options=['Not a face'] + sorted(
-                                                         st.session_state.name_options.keys()),
-                                                     accept_new_options=True,
-                                                     placeholder=None,
-                                                     index=None)
-
-                        submitted = st.form_submit_button(label='Submit')
-                        if submitted:
-                            record_name(selected_name=selected_name)
-                            st.rerun()
-
             elif not current_face.encoding:
                 with st.form(key="no_face_encoding_form", clear_on_submit=True):
                     # display a thumbnail of the current face
