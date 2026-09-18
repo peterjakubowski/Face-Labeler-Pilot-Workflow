@@ -91,8 +91,8 @@ class Face:
 
         if None in [self.W, self.H, self.X, self.Y]:
             self.normalize_face_location()
-        _W = int(self.W * height)
-        _H = int(self.H * width)
-        _X = int(self.X * height)
-        _Y = int(self.Y * width)
+        _W = int(np.round(self.W * height, 0))
+        _H = int(np.round(self.H * width, 0))
+        _X = int(np.round(self.X * height, 0))
+        _Y = int(np.round(self.Y * width, 0))
         return _W, _H, _X, _Y
