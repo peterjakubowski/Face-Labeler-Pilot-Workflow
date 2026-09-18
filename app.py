@@ -9,7 +9,7 @@
 
 import streamlit as st
 
-workflow = st.Page(page="pages/workflow.py", title="Face Labeler Workflow")
+workflow = st.Page(page="pages/workflow.py", title="Workflow")
 
 viewer = st.Page(page="pages/viewer.py", title="Image Viewer")
 
