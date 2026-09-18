@@ -216,7 +216,7 @@ def streamlit_workflow_app():
 
                 elif export_metadata_button:
                     # export metadata to a csv file next to original files
-                    export_metadata_to_csv(select_folder)
+                    export_metadata_to_csv(st.session_state.get('select_folder'))
 
                     st.success("Metadata exported to csv file! Workflow complete!", icon='✅')
 
