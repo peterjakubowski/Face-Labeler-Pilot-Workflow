@@ -26,6 +26,32 @@ class FaceClassifierKNN(BaseConnection[dict]):
         return (f"Face classifier contains **{number_of_embeddings}** total embeddings "
                 f"and **{number_of_unique_names}** unique names")
 
+    def is_in(self, embedding: np.ndarray) -> bool:
+        """
+        Check if an embedding (or similar) is already in the list of embeddings.
+        :param embedding: The new embedding to check.
+        :return: True or False
+        """
+
+        if (current_embeddings := self._instance.get('embeddings')) is None:
+            return False
+
+        new_embedding = np.asarray(embedding, dtype=np.float32)
+        distances = np.linalg.norm(current_embeddings - new_embedding, axis=1)
+
+        return distances[np.argmin(distances)] <= 1e-3
+
+    def unique_names(self) -> list[str]:
+        """
+        Returns a sorted list of unique names from the list of names.
+        :return: List of unique names
+        """
+
+        if (names := self._instance.get('names')) is None:
+            return []
+
+        return sorted(np.unique(names))
+
     def load_reference_data(self, reference_data: list[dict]):
 
         embeddings = []
