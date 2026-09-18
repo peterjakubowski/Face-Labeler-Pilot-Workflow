@@ -8,6 +8,9 @@ from models.face import Face
 
 
 def extract_metadata_from_files_with_exiftool(image_paths: list[Path]) -> list[dict]:
+    if not image_paths:
+        return []
+
     with exiftool.ExifToolHelper() as et:
         metadata = et.get_metadata(image_paths)
 
