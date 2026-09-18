@@ -4,6 +4,7 @@ import streamlit as st
 
 from config import COMPARE_FACES_TOLERANCE, TOP_K
 from utils.face_classifier import face_conn
+from utils.library import prepare_reference_data
 
 st.header("Face classifier settings")
 
@@ -47,10 +48,10 @@ if top_k_input != st.session_state.get('top_k', TOP_K) or threshold_input != st.
         st.rerun()
 
 if not face_conn.is_initialized():
-    initialize_button = st.button("Initialize")
+    initialize_button = st.button("Initialize Face Classifier", help="Load labeled faces from image library folder.")
     if initialize_button:
-        with st.spinner("Initializing face classifier"):
-            time.sleep(1)
+        with st.spinner(text="Initializing face classifier", show_time=True):
+            reference_data = prepare_reference_data()
             face_conn.load_reference_data(reference_data)
             st.rerun()
 
