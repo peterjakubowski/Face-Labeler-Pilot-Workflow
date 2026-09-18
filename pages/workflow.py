@@ -55,6 +55,7 @@ def streamlit_workflow_app():
                                  )
 
     if select_folder:
+        st.session_state['select_folder'] = select_folder
         # Streamlit button widget, kicks off the face detection workflow when pressed
         start_face_detection = st.button(label="Detect Faces")
         if start_face_detection:
