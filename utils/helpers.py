@@ -5,6 +5,7 @@ import streamlit as st
 from image_utils import list_image_paths
 
 from config import IMG_DIR
+from utils.face_classifier import face_conn
 from utils.image_processing import detect_faces
 
 
