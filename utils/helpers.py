@@ -36,8 +36,6 @@ def run_face_detection_workflow(select_folder: str):
     st.session_state['face_i'] = 1
     # dictionary of labeled faces
     st.session_state['labeled'] = defaultdict(list)
-    # dictionary of face encodings and names
-    st.session_state['data'] = {'encodings': [], 'names': []}
     # dictionary of names/identities and counts
     st.session_state['name_options'] = defaultdict(int)
 
