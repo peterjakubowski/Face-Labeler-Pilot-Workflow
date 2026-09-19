@@ -4,7 +4,7 @@ from config import COMPARE_FACES_TOLERANCE, TOP_K
 from utils.face_classifier import face_conn
 from utils.library import prepare_reference_data
 
-st.header("Face classifier settings")
+st.title("Face recognition settings")
 
 st.write(st.session_state)
 
