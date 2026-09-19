@@ -1,5 +1,3 @@
-import time
-
 import streamlit as st
 
 from config import COMPARE_FACES_TOLERANCE, TOP_K
