@@ -6,7 +6,7 @@ from utils.library import prepare_reference_data
 
 st.title("Face Recognition Settings")
 
-st.write(st.session_state)
+st.write("Control how the system recognizes faces.")
 
 top_k_input = st.number_input(
     label="Top K",
@@ -37,7 +37,7 @@ threshold_input = st.number_input(
     )
 )
 
-st.write(face_conn.info())
+st.info(face_conn.info())
 
 if top_k_input != st.session_state.get('top_k', TOP_K) or threshold_input != st.session_state.get('threshold', COMPARE_FACES_TOLERANCE):
     save_settings_button = st.button("Save settings", type="secondary")
@@ -60,14 +60,11 @@ if not face_conn.is_initialized():
             st.rerun()
 
 else:
-    # st.write(face_conn.info())
-
     with st.popover(
         label="Reset Face Classifier",
         help=(
-            "Clears active references from the application's memory. This removes all "
-            "loaded name metadata and face embedding vectors, resetting the classifier to an "
-            "uninitialized state. Your physical image files on disk will not be altered."
+            "Clears all loaded name metadata and face embedding from the application's memory, "
+            "resetting the classifier to an uninitialized state."
         )
     ):
         st.write("Are you sure you want to reset the face classifier?\n\n"
