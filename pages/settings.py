@@ -49,14 +49,9 @@ if top_k_input != st.session_state.get('top_k', TOP_K) or threshold_input != st.
 
 if not face_conn.is_initialized():
     initialize_button = st.button(
-        "Scan Reference Library",
+        "Load Library Faces",
         type="primary",
-        help=(
-            "Scans your library folder to extract existing face region metadata and names. "
-            "It runs each face through a face recognition model to generate embedding vectors, creating "
-            "a master reference matrix. The system then uses vector distance math to quickly "
-            "identify matches in your new photos."
-        )
+        help="Scans your library folder to extract existing face region metadata and names from labeled images."
     )
     if initialize_button:
         with st.spinner(text="Initializing face classifier", show_time=True):
