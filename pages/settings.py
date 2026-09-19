@@ -1,3 +1,12 @@
+# Face Recognition Settings
+#
+# Author: Peter Jakubowski
+# Date: 9/19/2026
+# Description: Streamlit app page that controls how
+# the app recognizes faces.
+#
+#
+
 import streamlit as st
 
 from config import COMPARE_FACES_TOLERANCE, TOP_K
