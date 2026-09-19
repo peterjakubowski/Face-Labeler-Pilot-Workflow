@@ -37,6 +37,8 @@ threshold_input = st.number_input(
     )
 )
 
+st.write(face_conn.info())
+
 if top_k_input != st.session_state.get('top_k', TOP_K) or threshold_input != st.session_state.get('threshold', COMPARE_FACES_TOLERANCE):
     save_settings_button = st.button("Save settings", type="secondary")
 
@@ -63,7 +65,7 @@ if not face_conn.is_initialized():
             st.rerun()
 
 else:
-    st.write(face_conn.info())
+    # st.write(face_conn.info())
 
     with st.popover(
         label="Reset Face Classifier",
