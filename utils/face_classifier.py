@@ -36,7 +36,7 @@ class FaceClassifierKNN(BaseConnection[dict]):
         number_of_unique_names = np.unique(self._instance.get('names', np.empty(0))).shape[0]
 
         return (f"Face classifier contains **{number_of_embeddings}** total face embeddings "
-                f"and **{number_of_unique_names}** unique names")
+                f"and **{number_of_unique_names}** unique names.")
 
     def is_in(self, embedding: np.ndarray) -> bool:
         """
