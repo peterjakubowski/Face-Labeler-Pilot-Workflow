@@ -15,7 +15,7 @@ top_k_input = st.number_input(
     step=1,
     value=st.session_state.get('top_k', TOP_K),
     help=(
-        "Controls how many close matches the AI reviews before applying a name tag. "
+        "Controls how many close matches the system reviews before applying a name tag. "
         "Lower values (1–3) work best if you have very few reference photos of a person. "
         "Higher values require a larger consensus among your existing collection, which "
         "improves tagging accuracy but requires you to have already tagged multiple photos of that person."
@@ -29,11 +29,11 @@ threshold_input = st.number_input(
     step=0.05,
     value=st.session_state.get('threshold', COMPARE_FACES_TOLERANCE),
     help=(
-        "Controls how aggressively the AI applies automatic tags.\n\n"
+        "Controls how aggressively the system applies automatic tags.\n\n"
         "• Lower (0.3 – 0.45): High accuracy. "
-        "Prevents wrong tags, but forces you to manually tag photos the AI wasn't 100% sure about.\n\n"
+        "Prevents wrong tags, but forces you to manually tag photos the system wasn't 100% sure about.\n\n"
         "• Higher (0.65 – 0.8): Auto-tag expansion. "
-        "The AI will aggressively guess and tag more faces, but you may occasionally have to fix a mistagged photo."
+        "The system will aggressively guess and tag more faces, but you may occasionally have to fix a mistagged photo."
     )
 )
 
