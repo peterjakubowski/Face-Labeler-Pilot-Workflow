@@ -38,7 +38,7 @@ threshold_input = st.number_input(
 )
 
 if top_k_input != st.session_state.get('top_k', TOP_K) or threshold_input != st.session_state.get('threshold', COMPARE_FACES_TOLERANCE):
-    save_settings_button = st.button("Save settings")
+    save_settings_button = st.button("Save settings", type="secondary")
 
     if save_settings_button:
         st.session_state['top_k'] = int(top_k_input)
