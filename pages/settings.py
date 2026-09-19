@@ -46,7 +46,16 @@ if top_k_input != st.session_state.get('top_k', TOP_K) or threshold_input != st.
         st.rerun()
 
 if not face_conn.is_initialized():
-    initialize_button = st.button("Initialize Face Classifier", help="Load labeled faces from image library folder.")
+    initialize_button = st.button(
+        "Scan Reference Library",
+        type="primary",
+        help=(
+            "Scans your library folder to extract existing face region metadata and names. "
+            "It runs each face through a face recognition model to generate embedding vectors, creating "
+            "a master reference matrix. The system then uses vector distance math to quickly "
+            "identify matches in your new photos."
+        )
+    )
     if initialize_button:
         with st.spinner(text="Initializing face classifier", show_time=True):
             reference_data = prepare_reference_data()
@@ -56,11 +65,25 @@ if not face_conn.is_initialized():
 else:
     st.write(face_conn.info())
 
-    reset_button = st.button("Reset Face Classifier")
-    if reset_button:
-        face_conn.reset()
-        if 'top_k' in st.session_state:
-            del st.session_state['top_k']
-        if 'threshold' in st.session_state:
-            del st.session_state['threshold']
-        st.rerun()
+    with st.popover(
+        label="Reset Face Classifier",
+        help=(
+            "Clears active references from the application's memory. This removes all "
+            "loaded name metadata and face embedding vectors, resetting the classifier to an "
+            "uninitialized state. Your physical image files on disk will not be altered."
+        )
+    ):
+        st.write("Are you sure you want to reset the face classifier?\n\n"
+                 "This will clear all loaded name metadata and face embeddings.")
+        reset_button = st.button(
+            "Confirm Reset",
+            type="secondary",
+
+        )
+        if reset_button:
+            face_conn.reset()
+            if 'top_k' in st.session_state:
+                del st.session_state['top_k']
+            if 'threshold' in st.session_state:
+                del st.session_state['threshold']
+            st.rerun()
