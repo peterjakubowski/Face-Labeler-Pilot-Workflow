@@ -1,1 +1,1 @@
-`watch_folder` Add your folder(s) of images to this directory. Supported file types are JPEG, PNG, and TIFF.
+`watch_folder` Add your folder(s) of images to this directory. Supported file types are JPEG, PNG, TIFF, CR2, DNG, and NEF.
