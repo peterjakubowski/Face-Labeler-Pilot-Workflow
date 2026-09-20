@@ -1,4 +1,4 @@
-# Face Labeler Labeler Pilot is a Streamlit and Python-based photography workflow tool
+# Face Labeler Pilot is a Streamlit and Python-based photography workflow tool
 # for tagging and viewing people shown in images.
 #
 # Author: Peter Jakubowski
