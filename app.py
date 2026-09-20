@@ -11,7 +11,7 @@ import streamlit as st
 
 workflow = st.Page(page="pages/workflow.py", title="Workflow")
 
-viewer = st.Page(page="pages/viewer.py", title="Image Viewer")
+viewer = st.Page(page="pages/viewer.py", title="Viewer")
 
 settings = st.Page(page="pages/settings.py", title="Settings")
 
