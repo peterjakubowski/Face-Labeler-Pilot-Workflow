@@ -1,0 +1,1 @@
+`library` Add your labeled images to this directory. Files must have 'Face' regions (`XMP-mwg-rs`) saved in the embedded metadata. Supported file types are JPEG, PNG, TIFF, CR2, DNG, and NEF.
