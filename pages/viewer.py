@@ -27,6 +27,7 @@ def streamlit_viewer_app():
 
     st.title("Image Viewer")
 
+    st.write("View labeled faces.")
     # list all the folders inside the watch folder
     # folder_names = [folder for folder in os.listdir(IMG_DIR) if not folder.startswith(".")]
     folder_names = list_folders_in_watch_folder()
