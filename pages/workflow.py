@@ -10,13 +10,13 @@
 
 import time
 
-import face_recognition
 import pandas as pd
 import streamlit as st
 
-from config import AUTO_CONFIRM_MATCHES_TIME, COMPARE_FACES_TOLERANCE
+from config import AUTO_CONFIRM_MATCHES_TIME, COMPARE_FACES_TOLERANCE, TOP_K
 from utils.csv import export_metadata_to_csv
 from utils.exiftool import write_metadata_with_exiftool
+from utils.face_classifier import face_conn
 from utils.helpers import (
     list_folders_in_watch_folder,
     record_name,
@@ -56,6 +56,7 @@ def streamlit_workflow_app():
                                  )
 
     if select_folder:
+        st.session_state['select_folder'] = select_folder
         # Streamlit button widget, kicks off the face detection workflow when pressed
         start_face_detection = st.button(label="Detect Faces")
         if start_face_detection:
@@ -102,35 +103,42 @@ def streamlit_workflow_app():
                 #       ==============================================
 
                 # compare the face encoding to existing encodings to see if we can find a match
-                # note: the lower the tolerance, the more sensitive the algorithm is at matching faces
-                matches = face_recognition.compare_faces(st.session_state.data['encodings'],
-                                                         current_face.encoding[0],
-                                                         tolerance=COMPARE_FACES_TOLERANCE)
+                # note: the lower the tolerance/threshold, the more sensitive the algorithm is at matching faces
+                predicted_name, confidence_percentage = face_conn.predict(
+                    embedding=current_face.encoding[0],
+                    k=int(st.session_state.get('top_k', TOP_K)),
+                    threshold=float(st.session_state.get('threshold', COMPARE_FACES_TOLERANCE))
+                )
+                if predicted_name == "Unknown face":
+                    with st.form(key="new_face_form", clear_on_submit=True):
+                        # display a thumbnail of the current face
+                        st.image(current_face_img, width=100)
+                        st.write("I don't recognize this face, who is this?")
+                        selected_name = st.selectbox(label=('Type in a new name or select one from the list. '
+                                                            'Select "Not a face" to skip this face.'),
+                                                     options=['Not a face'] + face_conn.unique_names(),
+                                                     accept_new_options=True,
+                                                     placeholder=None,
+                                                     index=None)
 
-                if True in matches:
-                    # count matches and find the name with the most matches
-                    matched_indices = [i for (i, b) in enumerate(matches) if b]
-                    count = {}
-                    for i in matched_indices:
-                        name = st.session_state.data['names'][i]
-                        count[name] = count.get(name, 0) + 1
-                    predicted_name = max(count, key=count.get)
-
+                        submitted = st.form_submit_button(label='Submit')
+                        if submitted:
+                            record_name(selected_name=selected_name)
+                            st.rerun()
+                else:
                     # if auto confirm matches is not checked, then provide a form to label the current face
                     if not auto_confirm_matches:
                         with st.form(key="predicted_name_form", clear_on_submit=True):
                             # display a thumbnail of the current face
                             st.image(current_face_img, width=100)
 
-                            st.write(f'I think this face belongs to **{predicted_name}**, can you confirm?')
+                            st.write(f'I think this face belongs to **{predicted_name}**, ({confidence_percentage}%) can you confirm?')
                             selected_name = st.selectbox(label=('The predicted name has been pre-selected, '
                                                                 'click the submit button to confirm.\n\n'
                                                                 'Select "Not a face" to skip this face.\n\n'
                                                                 'Or, add or select someone else.\n'),
-                                                         options=['Not a face'] + sorted(
-                                                             st.session_state.name_options.keys()),
-                                                         index=sorted(st.session_state.name_options.keys()).index(
-                                                             predicted_name) + 1,
+                                                         options=['Not a face'] + sorted(face_conn.unique_names()),
+                                                         index=face_conn.unique_names().index(predicted_name) + 1,
                                                          accept_new_options=True,
                                                          placeholder=None)
 
@@ -143,34 +151,16 @@ def streamlit_workflow_app():
                     elif auto_confirm_matches:
                         # display a thumbnail of the current face
                         st.image(current_face_img, width=100)
-                        st.write(f"This face belongs to **{predicted_name}**")
+                        st.write(f"This face belongs to **{predicted_name}** ({confidence_percentage}%)")
                         st.selectbox(label="Predicted name",
-                                     options=sorted(st.session_state.name_options.keys()),
-                                     index=sorted(st.session_state.name_options.keys()).index(predicted_name),
+                                     options=face_conn.unique_names(),
+                                     index=face_conn.unique_names().index(predicted_name),
                                      disabled=True
                                      )
                         # wait for a moment, user can still interrupt by unchecking auto confirm matches
                         time.sleep(AUTO_CONFIRM_MATCHES_TIME)
                         record_name(selected_name=predicted_name)
                         st.rerun()
-
-                else:
-                    with st.form(key="new_face_form", clear_on_submit=True):
-                        # display a thumbnail of the current face
-                        st.image(current_face_img, width=100)
-                        st.write("I don't recognize this face, who is this?")
-                        selected_name = st.selectbox(label=('Type in a new name or select one from the list. '
-                                                            'Select "Not a face" to skip this face.'),
-                                                     options=['Not a face'] + sorted(
-                                                         st.session_state.name_options.keys()),
-                                                     accept_new_options=True,
-                                                     placeholder=None,
-                                                     index=None)
-
-                        submitted = st.form_submit_button(label='Submit')
-                        if submitted:
-                            record_name(selected_name=selected_name)
-                            st.rerun()
 
             elif not current_face.encoding:
                 with st.form(key="no_face_encoding_form", clear_on_submit=True):
@@ -179,7 +169,7 @@ def streamlit_workflow_app():
                     st.write('This face has no encoding. Is this a face?')
                     selected_name = st.selectbox(label=('Type in a new name or select one from the list. '
                                                         'Select "Not a face" to skip this face.'),
-                                                 options=['Not a face'] + sorted(st.session_state.name_options.keys()),
+                                                 options=['Not a face'] + face_conn.unique_names(),
                                                  accept_new_options=True,
                                                  placeholder=None,
                                                  index=0
@@ -226,7 +216,7 @@ def streamlit_workflow_app():
 
                 elif export_metadata_button:
                     # export metadata to a csv file next to original files
-                    export_metadata_to_csv(select_folder)
+                    export_metadata_to_csv(st.session_state.get('select_folder'))
 
                     st.success("Metadata exported to csv file! Workflow complete!", icon='✅')
 

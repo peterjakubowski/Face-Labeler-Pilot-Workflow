@@ -108,9 +108,31 @@ streamlit run app.py
 
 Then open http://localhost:8501
 
-## Future Improvements and Features
+## Pages
 
-* Give the user an option to change the tolerance for finding a match.
+### Workflow
+
+The 3-step Face Labeler Pilot post-production workflow tool that uses face recognition to tag people shown in photographs.
+
+### Viewer
+
+A simple image viewer to view labeled faces. It opens all images in a folder (up to 50) and displays them with annotated face regions.
+
+### Settings
+
+Controls how the system recognizes faces.
+
+* **Top-k**: Controls how many close matches the system reviews before applying a name tag. 
+  * Lower values (1–3) work best if you have very few reference photos of a person. 
+  * Higher values require a larger consensus among your existing collection, which improves tagging accuracy but requires you to have already tagged multiple photos of that person.
+* **Threshold**: Controls how aggressively the system applies automatic tags.
+  * Lower (0.3 – 0.45): High accuracy. Prevents wrong tags, but forces you to manually tag photos the system wasn't 100% sure about. 
+  * Higher (0.65 – 0.8): The system will aggressively guess and tag more faces, but you may occasionally have to fix a mistagged photo.
+* **Load Library Faces**: Loads labeled faces from images in the `library` folder if the face classifier is uninitialized. Scans the `library` folder to extract existing face region metadata and names from labeled images. It runs each face through a face recognition model to generate face embeddings to be used in the face classifier.
+* **Reset Face Classifier**: Clears all loaded name metadata and face embedding from the application's memory, resetting the face classifier to an uninitialized state. Your physical image files on disk are not altered.
+
+
+## Future Improvements and Features
 
 * Add additional face detection algorithms (or replace the current with another) that can better detect faces turned to the side or in profile. The current algorithm in use does best at detected faces that are turned towards the camera.
 

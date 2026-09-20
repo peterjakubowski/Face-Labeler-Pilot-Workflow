@@ -5,6 +5,7 @@ import streamlit as st
 from image_utils import list_image_paths
 
 from config import IMG_DIR
+from utils.face_classifier import face_conn
 from utils.image_processing import detect_faces
 
 
@@ -35,8 +36,6 @@ def run_face_detection_workflow(select_folder: str):
     st.session_state['face_i'] = 1
     # dictionary of labeled faces
     st.session_state['labeled'] = defaultdict(list)
-    # dictionary of face encodings and names
-    st.session_state['data'] = {'encodings': [], 'names': []}
     # dictionary of names/identities and counts
     st.session_state['name_options'] = defaultdict(int)
 
@@ -65,11 +64,12 @@ def record_name(selected_name: str) -> None:
             st.session_state.name_options[current_face.person_shown] += 1
             st.session_state.face_i += 1
             # add the current face to the dictionary of labeled faces
-            st.session_state.labeled[current_face.img_path].append(current_face)
+            st.session_state.labeled[str(current_face.img_path)].append(current_face)
             # if the current face has an encoding, append it along with the name
             # to the list of encodings and names for future face recognitions
-            if len(current_face.encoding) > 0:
-                st.session_state.data['encodings'].append(current_face.encoding[0])
-                st.session_state.data['names'].append(current_face.person_shown)
+            if len(current_face.encoding) > 0 and not face_conn.is_in(current_face.encoding[0]):
+                # add new face to the face classifier if we don't already have a similar record
+                face_conn.add_new_face(current_face.person_shown, current_face.encoding[0])
+
         # pop the current face from the queue
         st.session_state['faces_detected'].popleft()

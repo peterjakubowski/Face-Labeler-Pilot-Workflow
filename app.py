@@ -9,10 +9,12 @@
 
 import streamlit as st
 
-workflow = st.Page(page="pages/workflow.py", title="Face Labeler Workflow")
+workflow = st.Page(page="pages/workflow.py", title="Workflow")
 
-viewer = st.Page(page="pages/viewer.py", title="Image Viewer")
+viewer = st.Page(page="pages/viewer.py", title="Viewer")
 
-pages = st.navigation([workflow, viewer])
+settings = st.Page(page="pages/settings.py", title="Settings")
+
+pages = st.navigation([workflow, viewer, settings])
 
 pages.run()

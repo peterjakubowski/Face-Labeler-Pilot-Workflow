@@ -71,10 +71,10 @@ class Face:
 
         top, right, bottom, left = self.face_location
         img_w, img_h = self.img_resized_width, self.img_resized_height
-        self.W = round((right - left) / img_h, 4)
-        self.H = round((bottom - top) / img_w, 4)
-        self.X = round(left / img_h, 4)
-        self.Y = round(top / img_w, 4)
+        self.W = np.round((right - left) / img_h, 6)
+        self.H = np.round((bottom - top) / img_w, 6)
+        self.X = np.round(left / img_h, 6)
+        self.Y = np.round(top / img_w, 6)
 
     def reverse_transform_face_location(self, width: int, height: int) -> tuple[int, ...]:
         """
@@ -91,8 +91,8 @@ class Face:
 
         if None in [self.W, self.H, self.X, self.Y]:
             self.normalize_face_location()
-        _W = int(self.W * height)
-        _H = int(self.H * width)
-        _X = int(self.X * height)
-        _Y = int(self.Y * width)
+        _W = int(np.round(self.W * height, 0))
+        _H = int(np.round(self.H * width, 0))
+        _X = int(np.round(self.X * height, 0))
+        _Y = int(np.round(self.Y * width, 0))
         return _W, _H, _X, _Y
