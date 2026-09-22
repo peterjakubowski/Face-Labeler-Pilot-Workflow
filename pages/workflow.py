@@ -194,11 +194,14 @@ def streamlit_workflow_app():
             elif st.session_state['labeled']:
                 st.success('All faces have been labeled!', icon='✅')
 
-                # display a dataframe with counts of unique names/labels
+                # create a dataframe with counts of unique names/labels
                 df = pd.DataFrame(data=st.session_state.name_options.items(),
                                   columns=['names', 'counts'])
                 df.set_index('names', inplace=True)
-                st.dataframe(df.sort_values(by=['counts', 'names'], ascending=[False, True]), hide_index=False, width="content")
+                # sort the values by counts in descending order, then by name in ascending
+                df = df.sort_values(by=['counts', 'names'], ascending=[False, True])
+                # display the dataframe
+                st.dataframe(df, hide_index=False, width="content")
 
                 #       ==================================================
                 # INFO: ===== Begin Step 3: Write/Save/Embed Metadata ====
