@@ -133,9 +133,9 @@ class FaceClassifierKNN(BaseConnection[dict]):
         # make sure the face embedding we're trying to name is a numpy array
         unidentified_face_embedding = np.asarray(embedding, dtype=np.float32)
         # retrieve array of faces that have been named
-        known_face_embeddings = self._instance.get('embeddings', None)
+        known_face_embeddings: None | np.ndarray = self._instance.get('embeddings', None)
         # If we don't know any faces yet, we can't predict a name
-        if known_face_embeddings is None:
+        if known_face_embeddings is None or known_face_embeddings.shape[0] < 1:
             return "Unknown face", 0.0
 
         # calculate the Euclidean distance between all known face embeddings and face embedding we're trying to name
