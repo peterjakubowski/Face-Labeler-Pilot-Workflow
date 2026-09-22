@@ -93,8 +93,12 @@ class FaceClassifierKNN(BaseConnection[dict]):
                 embeddings.append(np.asarray(ref_embedding, dtype=np.float32))
                 names.append(str(ref_name))
 
-        self._instance['embeddings'] = np.array(embeddings, dtype=np.float32)
-        self._instance['names'] = np.array(names, dtype=str)
+        if embeddings and names:
+            self._instance['embeddings'] = np.array(embeddings, dtype=np.float32)
+            self._instance['names'] = np.array(names, dtype=str)
+        else:
+            self._instance['embeddings'] = np.empty((0, 128))
+            self._instance['names'] = np.empty(0)
 
     def add_new_face(self, person_shown: str, embedding: np.ndarray):
         """
