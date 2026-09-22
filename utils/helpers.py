@@ -4,7 +4,7 @@ from pathlib import Path
 import streamlit as st
 from image_utils import list_image_paths
 
-from config import IMG_DIR
+from config import IGNORE_FACE_TEXT, IMG_DIR
 from utils.face_classifier import face_conn
 from utils.image_processing import detect_faces
 
@@ -54,7 +54,8 @@ def record_name(selected_name: str) -> None:
         # peek at the first face in the queue of detected faces
         current_face = st.session_state['faces_detected'][0]
 
-        if selected_name == 'Not a face':
+        # ignore this face if the selected name is set to ignore
+        if selected_name == IGNORE_FACE_TEXT:
             # decrement the count of detected faces
             st.session_state.faces_count -= 1
         else:
