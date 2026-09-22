@@ -13,7 +13,12 @@ import time
 import pandas as pd
 import streamlit as st
 
-from config import AUTO_CONFIRM_MATCHES_TIME, COMPARE_FACES_TOLERANCE, TOP_K
+from config import (
+    AUTO_CONFIRM_MATCHES_TIME,
+    COMPARE_FACES_TOLERANCE,
+    IGNORE_FACE_TEXT,
+    TOP_K,
+)
 from utils.csv import export_metadata_to_csv
 from utils.exiftool import write_metadata_with_exiftool
 from utils.face_classifier import face_conn
@@ -115,8 +120,8 @@ def streamlit_workflow_app():
                         st.image(current_face_img, width=100)
                         st.write("I don't recognize this face, who is this?")
                         selected_name = st.selectbox(label=('Type in a new name or select one from the list. '
-                                                            'Select "Not a face" to skip this face.'),
-                                                     options=['Not a face'] + face_conn.unique_names(),
+                                                            f'Select "{IGNORE_FACE_TEXT}" to skip this face.'),
+                                                     options=[IGNORE_FACE_TEXT] + face_conn.unique_names(),
                                                      accept_new_options=True,
                                                      placeholder=None,
                                                      index=None)
@@ -135,9 +140,9 @@ def streamlit_workflow_app():
                             st.write(f'I think this face belongs to **{predicted_name}**, ({confidence_percentage}%) can you confirm?')
                             selected_name = st.selectbox(label=('The predicted name has been pre-selected, '
                                                                 'click the submit button to confirm.\n\n'
-                                                                'Select "Not a face" to skip this face.\n\n'
+                                                                f'Select "{IGNORE_FACE_TEXT}" to skip this face.\n\n'
                                                                 'Or, add or select someone else.\n'),
-                                                         options=['Not a face'] + sorted(face_conn.unique_names()),
+                                                         options=[IGNORE_FACE_TEXT] + sorted(face_conn.unique_names()),
                                                          index=face_conn.unique_names().index(predicted_name) + 1,
                                                          accept_new_options=True,
                                                          placeholder=None)
@@ -168,8 +173,8 @@ def streamlit_workflow_app():
                     st.image(current_face_img, width=100)
                     st.write('This face has no encoding. Is this a face?')
                     selected_name = st.selectbox(label=('Type in a new name or select one from the list. '
-                                                        'Select "Not a face" to skip this face.'),
-                                                 options=['Not a face'] + face_conn.unique_names(),
+                                                        f'Select "{IGNORE_FACE_TEXT}" to skip this face.'),
+                                                 options=[IGNORE_FACE_TEXT] + face_conn.unique_names(),
                                                  accept_new_options=True,
                                                  placeholder=None,
                                                  index=0
