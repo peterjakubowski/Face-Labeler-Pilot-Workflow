@@ -7,3 +7,5 @@ COMPARE_FACES_TOLERANCE = 0.55  # the lower the tolerance, the more sensitive th
 AUTO_CONFIRM_MATCHES_TIME = 1  # Number of seconds to wait before submitting predicted name
 IMG_PREVIEW_WIDTH = 1500
 TOP_K = 5  # K nearest neighbors to return when calculating distance between labeled face embeddings and unlabeled
+
+IGNORE_FACE_TEXT = "Ignore this face"
