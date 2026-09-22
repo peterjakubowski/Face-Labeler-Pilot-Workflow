@@ -198,7 +198,7 @@ def streamlit_workflow_app():
                 df = pd.DataFrame(data=st.session_state.name_options.items(),
                                   columns=['names', 'counts'])
                 df.set_index('names', inplace=True)
-                st.dataframe(df.sort_index())
+                st.dataframe(df.sort_values(by=['counts', 'names'], ascending=[False, True]), hide_index=False, width="content")
 
                 #       ==================================================
                 # INFO: ===== Begin Step 3: Write/Save/Embed Metadata ====
