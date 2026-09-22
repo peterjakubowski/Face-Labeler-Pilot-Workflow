@@ -42,8 +42,8 @@ class FaceClassifierKNN(BaseConnection[dict]):
         if not self.is_initialized():
             return "Face classifier is uninitialized."
 
-        number_of_embeddings = self._instance.get('embeddings', np.empty(0)).shape[0]
-        number_of_unique_names = np.unique(self._instance.get('names', np.empty(0))).shape[0]
+        number_of_embeddings = self._instance.get('embeddings').shape[0]
+        number_of_unique_names = np.unique(self._instance.get('names')).shape[0]
 
         return (f"Face classifier contains **{number_of_embeddings}** total face embeddings "
                 f"and **{number_of_unique_names}** unique names.")
