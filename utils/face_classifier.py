@@ -55,7 +55,9 @@ class FaceClassifierKNN(BaseConnection[dict]):
         :return: True or False
         """
 
-        if (current_embeddings := self._instance.get('embeddings')) is None:
+        current_embeddings: None | np.ndarray = self._instance.get('embeddings', None)
+
+        if current_embeddings is None or current_embeddings.shape[0] < 1:
             return False
 
         new_embedding = np.asarray(embedding, dtype=np.float32)
