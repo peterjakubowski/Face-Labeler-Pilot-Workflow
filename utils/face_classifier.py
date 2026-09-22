@@ -8,8 +8,18 @@ from config import COMPARE_FACES_TOLERANCE, TOP_K
 
 
 class FaceClassifierKNN(BaseConnection[dict]):
+    """
+    K nearest neighbors face classifier as a Streamlit connection class.
+    """
 
     def _connect(self, **kwargs: Any) -> dict:
+        """
+        A connection instance is a dictionary with two keys: embeddings and names.
+        When the connection is uninitialized, both values are None.
+        When initialized, values are numpy arrays.
+        :param kwargs:
+        :return: Embeddings and dames dictionary
+        """
 
         return {"embeddings": None,
                 "names": None
@@ -29,7 +39,7 @@ class FaceClassifierKNN(BaseConnection[dict]):
         :return: String of summary statistics
         """
 
-        if self._instance.get('embeddings') is None:
+        if not self.is_initialized():
             return "Face classifier is uninitialized."
 
         number_of_embeddings = self._instance.get('embeddings', np.empty(0)).shape[0]
@@ -114,38 +124,40 @@ class FaceClassifierKNN(BaseConnection[dict]):
         :return: Tuple with predicted name and confidence percentage
         """
 
+        # make sure the face embedding we're trying to name is a numpy array
         unidentified_face_embedding = np.asarray(embedding, dtype=np.float32)
-
+        # retrieve array of faces that have been named
         known_face_embeddings = self._instance.get('embeddings', None)
-
+        # If we don't know any faces yet, we can't predict a name
         if known_face_embeddings is None:
             return "Unknown face", 0.0
 
+        # calculate the Euclidean distance between all known face embeddings and face embedding we're trying to name
         distances = np.linalg.norm(known_face_embeddings - unidentified_face_embedding, axis=1)
-
+        # find the indices for the k nearest neighbors
         top_k_indices = np.argsort(distances)[:k]
-
+        # get distances and names for the k nearest neighbors
         neighbor_distances = distances[top_k_indices]
         neighbor_names = self._instance.get('names')[top_k_indices]
-
+        # keep valid neighbors, remove any neighbors that are above the threshold distance
         valid_mask = neighbor_distances <= threshold
         valid_distances = neighbor_distances[valid_mask]
         valid_names = neighbor_names[valid_mask]
-
+        # if we don't have any neighbors below the threshold, we can't predict a name
         if valid_distances.shape[0] < 1:
             return "Unknown face", 0.0
-
+        # calculate the inverse distances weights for all valid distances, add a small value to avoid zero division
         weights = 1.0 / (valid_distances + 1e-5)
-
-        scores = {}
-
+        # keep a tally of scores by name
+        scores: dict[str, np.float32] = {}
+        # iterate over each name and tally its weighted score
         for name in np.unique(valid_names):
             scores[name] = np.sum(weights[valid_names == name])
-
+        # find the name with the max score
         winner = max(scores, key=scores.get)
-
+        # sum up all the weights in the neighborhood
         total_neighborhood_weights = np.sum(weights)
-
+        # calculate the confidence percentage for the winner's score
         confidence_percentage = (scores[winner] / total_neighborhood_weights) * 100
 
         return str(winner), round(float(confidence_percentage), 2)
