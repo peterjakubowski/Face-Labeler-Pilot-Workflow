@@ -27,7 +27,7 @@ def streamlit_viewer_app():
 
     st.title("Image Viewer")
 
-    st.write("View labeled faces.")
+    st.write("Extracts embedded metadata from images and displays labeled faces surrounded by bounding boxes.")
     # list all the folders inside the watch folder
     # folder_names = [folder for folder in os.listdir(IMG_DIR) if not folder.startswith(".")]
     folder_names = list_folders_in_watch_folder()
@@ -36,48 +36,70 @@ def streamlit_viewer_app():
                                  options=folder_names,
                                  accept_new_options=False,
                                  index=None,
-                                 placeholder="Choose a folder of images")
+                                 placeholder=None)
     # click the button to display annotated images
-    annotate_faces = st.button(label="View Annotated Images")
+    annotate_faces = st.button(label="View Images")
 
-    if annotate_faces:
+    if select_folder and annotate_faces:
         # list file paths for all images in the selected folder limit to 50
-        image_paths = list(list_image_paths(str(IMG_DIR) + "/" + select_folder))[:50]
+        image_paths = list(list_image_paths(IMG_DIR / select_folder))[:50]
         # read metadata from all images using exiftool
         metadata = extract_metadata_from_files_with_exiftool(image_paths)
         # iterate through each image metadata
         for m in metadata:
             # check if our metadata has a path to the source file
-            if "SourceFile" in m:
+            source_file: str | None = m.get("SourceFile", None)
+            # retrieve region metadata: type, name, area(w, h, x, y)
+            region_type: list[str] = (
+                region_type
+                if isinstance(region_type := m.get("XMP:RegionType", []), list)
+                else [region_type]
+            )
+            region_name: list[str] = (
+                region_name
+                if isinstance(region_name := m.get("XMP:RegionName", []), list)
+                else [region_name]
+            )
+            region_area_w: list[float] = (
+                region_area_w
+                if isinstance(region_area_w := m.get("XMP:RegionAreaW", []), list)
+                else [region_area_w]
+            )
+            region_area_h: list[float] = (
+                region_area_h
+                if isinstance(region_area_h := m.get("XMP:RegionAreaH", []), list)
+                else [region_area_h]
+            )
+            region_area_x: list[float] = (
+                region_area_x
+                if isinstance(region_area_x := m.get("XMP:RegionAreaX", []), list)
+                else [region_area_x]
+            )
+            region_area_y: list[float] = (
+                r_area_y
+                if isinstance(r_area_y := m.get("XMP:RegionAreaY", []), list)
+                else [r_area_y]
+            )
+
+            if source_file is not None:
                 # open an image to annotate
-                _, img = prepare_image_for_inference(image_path=Path(m["SourceFile"]), img_size=IMG_PREVIEW_WIDTH)
+                _, img = prepare_image_for_inference(image_path=Path(source_file), img_size=IMG_PREVIEW_WIDTH)
+                # get the open image's width and height
                 width = img.shape[1]
                 height = img.shape[0]
-                # check if there is a region to annotate
-                if "XMP:RegionType" in m:
-                    # if our region type is a str, there is one region
-                    if isinstance(m["XMP:RegionType"], str) and m["XMP:RegionType"] == 'Face':
+                # iterate over each region and annotate the image if region is 'Face'
+                for i in range(len(region_type)):
+                    if region_type[i] == 'Face':
                         img = annotate_image_with_face_region_using_opencv(
                             img=img,
-                            person_shown=m["XMP:RegionName"],
-                            w=int(m["XMP:RegionAreaW"] * height),
-                            h=int(m["XMP:RegionAreaH"] * width),
-                            x=int(m["XMP:RegionAreaX"] * height),
-                            y=int(m["XMP:RegionAreaY"] * width)
+                            person_shown=region_name[i],
+                            w=int(region_area_w[i] * height),
+                            h=int(region_area_h[i] * width),
+                            x=int(region_area_x[i] * height),
+                            y=int(region_area_y[i] * width)
                         )
-                    # if our region is a list, there are multiple regions
-                    elif isinstance(m["XMP:RegionType"], list):
-                        # iterate over all regions
-                        for i in range(len(m["XMP:RegionType"])):
-                            if m["XMP:RegionType"][i] == 'Face':
-                                img = annotate_image_with_face_region_using_opencv(
-                                    img=img,
-                                    person_shown=m["XMP:RegionName"][i],
-                                    w=int(m["XMP:RegionAreaW"][i] * height),
-                                    h=int(m["XMP:RegionAreaH"][i] * width),
-                                    x=int(m["XMP:RegionAreaX"][i] * height),
-                                    y=int(m["XMP:RegionAreaY"][i] * width)
-                                )
+
+                # display the annotated image
                 st.image(img)
 
 
