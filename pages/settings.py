@@ -47,7 +47,7 @@ if top_k_input != st.session_state.get('top_k', TOP_K) or threshold_input != st.
 
 if not face_conn.is_initialized():
     initialize_button = st.button(
-        "Load Library Faces",
+        "Load Faces Library",
         type="primary",
         help="Scans your library folder to extract existing face region metadata and names from labeled images."
     )
