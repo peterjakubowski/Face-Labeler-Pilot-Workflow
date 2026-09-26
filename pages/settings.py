@@ -42,7 +42,7 @@ if top_k_input != st.session_state.get('top_k', TOP_K) or threshold_input != st.
 
     if save_settings_button:
         st.session_state['top_k'] = int(top_k_input)
-        st.session_state['threshold'] = float(threshold_input)
+        st.session_state['threshold'] = float(round(threshold_input, 2))
         st.rerun()
 
 if not face_conn.is_initialized():
