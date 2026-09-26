@@ -1,3 +1,5 @@
+![Run CI](https://github.com/peterjakubowski/Face-Labeler-Pilot-Workflow/actions/workflows/ci.yaml/badge.svg)
+
 # Face-Labeler-Pilot-Workflow
 
 Face Labeler Pilot is an interactive human-in-the-loop Python-based workflow tool for photographers, digital asset managers, and anyone needing to tag people shown in photographs.
