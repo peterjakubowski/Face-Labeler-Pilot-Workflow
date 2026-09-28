@@ -1,7 +1,7 @@
 import time
 from pathlib import Path
 
-import exiftool
+import exiftool  # type: ignore[import-untyped]
 import streamlit as st
 
 from models.face import Face
