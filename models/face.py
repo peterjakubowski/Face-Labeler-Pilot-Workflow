@@ -11,6 +11,20 @@ class Face:
     structure to store information about detected faces
     """
 
+    img_path: Path
+    img_width: int
+    img_height: int
+    img_resized_width: int
+    img_resized_height: int
+    face_location: tuple[int, ...]
+    encoding: list
+    match_candidate: bool
+    person_shown: str
+    W: float
+    H: float
+    X: float
+    Y: float
+
     def __init__(self,
                  img_path: Path,
                  img_width: int,
