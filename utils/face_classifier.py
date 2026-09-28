@@ -162,7 +162,7 @@ class FaceClassifierKNN(BaseConnection[dict]):
         # find the name with the max score
         winner = max(scores, key=lambda x: scores[x])
         # sum up all the weights in the neighborhood
-        total_neighborhood_weights = np.sum(weights)
+        total_neighborhood_weights: np.float32 = np.sum(weights, dtype=np.float32)
         # calculate the confidence percentage for the winner's score
         confidence_percentage = (scores[winner] / total_neighborhood_weights) * 100
 
