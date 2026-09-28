@@ -25,6 +25,26 @@ jobs:
         run: |
           pip install ruff
           ruff check .
+  mypy:
+    name: MyPy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies and MyPy
+        run: |
+          pip install -r requirements.txt
+          pip install mypy
+
+      - name: Run MyPy
+        run: |
+          mypy --install-types --non-interactive app.py config.py models/ pages/ utils/
   test:
     name: Unit Tests Python ${{ matrix.python-version }}
     needs: ruff
