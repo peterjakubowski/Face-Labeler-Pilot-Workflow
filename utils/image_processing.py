@@ -92,7 +92,7 @@ def detect_faces(img_paths: list[Path]) -> deque[Face]:
     _status_bar = st.progress(0, 'Firing up the face detection algorithm!')
     time.sleep(1)
     # keep a queue of found faces, the queue is a list of instances of class Face
-    q = deque()
+    q: deque[Face] = deque()
     # iterate over all image paths is the selected directory and gather all detected faces and face encodings
     for i, path in enumerate(img_paths):
         # update progress
