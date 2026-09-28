@@ -53,10 +53,10 @@ class Face:
         self.encoding = encoding
         self.match_candidate = True
         self.person_shown = ""
-        self.W = None
-        self.H = None
-        self.X = None
-        self.Y = None
+        # self.W = None
+        # self.H = None
+        # self.X = None
+        # self.Y = None
         self.normalize_face_location()
 
     def open_face_image(self) -> np.ndarray:
