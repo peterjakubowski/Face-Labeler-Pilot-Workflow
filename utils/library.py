@@ -1,6 +1,6 @@
 from pathlib import Path
 
-import face_recognition
+import face_recognition  # type: ignore[import-untyped]
 import numpy as np
 from image_utils import list_image_paths
 
