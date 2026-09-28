@@ -103,7 +103,7 @@ class Face:
         Y coordinate of the top of the bounding box.
         """
 
-        if None in [self.W, self.H, self.X, self.Y]:
+        if None in [self.W, self.H, self.X, self.Y]:  # this should never happen
             self.normalize_face_location()
         _W = int(np.round(self.W * height, 0))
         _H = int(np.round(self.H * width, 0))
