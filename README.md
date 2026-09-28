@@ -6,7 +6,7 @@ Face Labeler Pilot is an interactive human-in-the-loop Python-based workflow too
 
 The tool is designed to assist in tagging photos from events, portrait sessions, or similar photo shoots that show the same people multiple times across many images. The tool performs best on images of people with their faces turned directly towards the camera, like in group shots and portraits.
 
-The tool does not rely on any database of known faces or identities, rather it builds a list of known faces from the currrent session only and the names entered by the user. In its essence, a user need only enter the name of an individual once, thereafter, all representations of the individual is recognized if a match is found from previously labeled faces. This makes it a great tool for labeling faces that have never been seen before and may never be seen again by the photographer or editor. It only relies on the data from the current session and learns as it iterates through the session's images.
+The tool does not rely on any database of known faces or identities, rather it builds a list of known faces from the current session only and the names entered by the user. In its essence, a user need only enter the name of an individual once, thereafter, all representations of the individual is recognized if a match is found from previously labeled faces. This makes it a great tool for labeling faces that have never been seen before and may never be seen again by the photographer or editor. It only relies on the data from the current session and learns as it iterates through the session's images.
 
 ## Workflow Steps
 
@@ -27,7 +27,7 @@ git clone https://github.com/peterjakubowski/Face-Labeler-Pilot-Workflow.git
 cd Face-Labeler-Pilot-Workflow
 ```
 
-Before configuring your environment, you should have Python 3.10.12 installed. 
+Before configuring your environment, you should have Python 3.10+ installed. 
 
 It's highly recommended that you create a virtual environment, either using Python's built-in virtual environment or Conda virtual environment.
 
@@ -140,4 +140,4 @@ Controls how the system recognizes faces.
 
 * Try using an object detection model that first detects people (not faces) in an image before checking for faces  with the face detection algorithm. This could help increase the probability of finding a person in the image that needs to be tagged. A person without a face would always need to be manually tagged using this method since there would be no way to get a face encoding to compare to the list of known faces.
 
-* Create some kind of option to add additional tags based on the person shown in the image. This would require the user to supply keys and values for data lookup to take place. A possible use case could be e-commerce on-figure photography where a particular model is associated with products and skus that must be tagged in a shot. Images would be placed in the watch folder organized by shots (shot number) in seperate subfolders. A csv file could be included to provide model names (key), shot number(key), and product/skus (values).
+* Create some kind of option to add additional tags based on the person shown in the image. This would require the user to supply keys and values for data lookup to take place. A possible use case could be e-commerce on-figure photography where a particular model is associated with products and skus that must be tagged in a shot. Images would be placed in the watch folder organized by shots (shot number) in separate subfolders. A csv file could be included to provide model names (key), shot number(key), and product/skus (values).
