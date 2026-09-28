@@ -37,9 +37,12 @@ def prepare_reference_data() -> list[dict]:
         # check if there's a region in the xmp
         if 'XMP:RegionType' in m:
             # extract the file's path from the metadata
-            source_file = Path(m.get('SourceFile'))
+            source_file = m.get('SourceFile')
+            if source_file is None:
+                continue
+            source_file = Path(source_file)
             # open the image
-            shape, img = prepare_image_for_inference(Path(source_file))
+            shape, img = prepare_image_for_inference(source_file)
             # get lists of region type, names, and bounding box coordinates
             region_type = list(region_type if isinstance(region_type := m.get('XMP:RegionType'), list) else [region_type])
             persons_shown = list(persons_shown if isinstance(persons_shown := m.get('XMP:RegionName'), list) else [persons_shown])
