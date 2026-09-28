@@ -3,7 +3,7 @@ from collections import deque
 from pathlib import Path
 
 import cv2
-import face_recognition
+import face_recognition  # type: ignore[import-untyped]
 import numpy as np
 import streamlit as st
 from image_utils import rescale_width_height
