@@ -160,7 +160,7 @@ class FaceClassifierKNN(BaseConnection[dict]):
         for name in np.unique(valid_names):
             scores[name] = np.sum(weights[valid_names == name])
         # find the name with the max score
-        winner = max(scores, key=scores.get)
+        winner = max(scores, key=lambda x: scores[x])
         # sum up all the weights in the neighborhood
         total_neighborhood_weights = np.sum(weights)
         # calculate the confidence percentage for the winner's score
