@@ -71,4 +71,5 @@ def open_image(image_path: Path) -> np.ndarray:
         raw_image = read_raw_image_with_rawpy(image_path)
         return raw_image
 
-    return None
+    else:
+        raise ValueError(f"Unsupported file format: {extension}")
