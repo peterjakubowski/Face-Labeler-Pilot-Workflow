@@ -42,8 +42,8 @@ class FaceClassifierKNN(BaseConnection[dict]):
         if not self.is_initialized():
             return "Face classifier is uninitialized."
 
-        number_of_embeddings = self._instance.get('embeddings').shape[0]
-        number_of_unique_names = np.unique(self._instance.get('names')).shape[0]
+        number_of_embeddings = self._instance.get('embeddings', np.empty((0,128))).shape[0]
+        number_of_unique_names = np.unique(self._instance.get('names', np.empty(0))).shape[0]
 
         return (f"Face classifier contains **{number_of_embeddings}** total face embeddings "
                 f"and **{number_of_unique_names}** unique names.")
@@ -115,8 +115,8 @@ class FaceClassifierKNN(BaseConnection[dict]):
             self._instance['names'] = np.array([person_shown], dtype=str)
             return
 
-        self._instance['embeddings'] = np.vstack([self._instance.get('embeddings'), new_embedding])
-        self._instance['names'] = np.append(self._instance.get('names'), person_shown)
+        self._instance['embeddings'] = np.vstack([self._instance.get('embeddings', np.empty((0, 128))), new_embedding])
+        self._instance['names'] = np.append(self._instance.get('names', np.empty(0)), person_shown)
 
     def predict(self, embedding: np.ndarray, k: int = TOP_K, threshold: float = COMPARE_FACES_TOLERANCE) -> tuple[str, float]:
         """
@@ -144,7 +144,7 @@ class FaceClassifierKNN(BaseConnection[dict]):
         top_k_indices = np.argsort(distances)[:k]
         # get distances and names for the k nearest neighbors
         neighbor_distances = distances[top_k_indices]
-        neighbor_names = self._instance.get('names')[top_k_indices]
+        neighbor_names = self._instance.get('names', np.empty(0))[top_k_indices]
         # keep valid neighbors, remove any neighbors that are above the threshold distance
         valid_mask = neighbor_distances <= threshold
         valid_distances = neighbor_distances[valid_mask]
