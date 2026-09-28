@@ -53,7 +53,7 @@ def read_raw_image_with_rawpy(image_path: Path) -> np.ndarray:
     return raw_image
 
 
-def open_image(image_path: Path) -> np.array:
+def open_image(image_path: Path) -> np.ndarray:
     """
     Returns a numpy array from an image path.
     :param image_path: Path to image
