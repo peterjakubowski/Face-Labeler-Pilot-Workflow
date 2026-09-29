@@ -1,4 +1,6 @@
 ![Run CI](https://github.com/peterjakubowski/Face-Labeler-Pilot-Workflow/actions/workflows/ci.yaml/badge.svg)
+<img src="https://img.shields.io/badge/python-3.10%2B-blue.svg" alt="python" />
+<img src="https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey.svg" alt="platform" />
 
 # Face-Labeler-Pilot-Workflow
 
