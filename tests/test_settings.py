@@ -145,7 +145,7 @@ class TestLoadLibrary:
 
         cv2.imwrite(str(new_image_name), new_image)
         # mock extracted metadata with a face region
-        mock_face_metadata = [{
+        mock_face_metadata = {
             'SourceFile': new_image_name,
             'XMP:RegionType': 'Face',
             'XMP:RegionName': 'Person Shown Name',
@@ -153,11 +153,11 @@ class TestLoadLibrary:
             'XMP:RegionAreaH': 0.0,
             'XMP:RegionAreaX': 0.0,
             'XMP:RegionAreaY': 0.0
-        }]
+        }
 
         monkeypatch.setattr(
             "utils.library.extract_metadata_from_files_with_exiftool",
-            lambda *args: mock_face_metadata
+            lambda *args: [mock_face_metadata]
         )
         # mock a face recognition face encoding
         # NOTE: while the encoding is mocked here, it's important to note that the `face_encodings` method
@@ -171,8 +171,6 @@ class TestLoadLibrary:
             "utils.library.face_recognition.face_encodings",
             lambda *args, **kwargs: [mock_face_encoding]
         )
-
-        at.run()
 
         at.switch_page(str(SETTINGS_PAGE_PATH)).run()
 
