@@ -104,7 +104,8 @@ def detect_faces(img_paths: list[Path]) -> deque[Face]:
         face_locations = face_recognition.face_locations(image, model='hog')
         # iterate over all detected faces
         for face_location in face_locations:
-            # get face encoding
+            # get face encodings
+            # (as long as you provide a location, an encoding is generated, even when no face is there)
             encodings = face_recognition.face_encodings(image,
                                                         known_face_locations=[face_location],
                                                         num_jitters=1,
