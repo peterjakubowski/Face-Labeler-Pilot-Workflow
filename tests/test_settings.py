@@ -118,14 +118,17 @@ class TestLoadLibrary:
 
         assert at.info[0].value == "Face classifier is uninitialized."
 
-    def test_app_settings_loads_library_when_directory_has_one_image_with_no_face(self, at: AppTest, mock_library_dir_path: Path):
+    def test_app_settings_loads_library_when_directory_has_one_image_with_no_face(self, at: AppTest, mock_library_dir_path: Path, monkeypatch):
 
         new_image_name = mock_library_dir_path / "test_image_1.jpg"
         new_image = np.zeros((100, 100, 3), dtype=np.uint8)
 
         cv2.imwrite(str(new_image_name), new_image)
 
-        at.run()
+        monkeypatch.setattr(
+            "utils.library.extract_metadata_from_files_with_exiftool",
+            lambda *args: []
+        )
 
         at.switch_page(str(SETTINGS_PAGE_PATH)).run()
 
