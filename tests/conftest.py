@@ -7,7 +7,7 @@ from streamlit.testing.v1 import AppTest
 
 from utils.face_classifier import face_conn
 
-APP_FILE_PATH = Path("app.py")
+APP_FILE_PATH = Path("../app.py")
 
 
 @pytest.fixture
