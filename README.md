@@ -102,6 +102,10 @@ conda env update --file environment.yml --prune
 
 Additionally, [Exiftool](https://exiftool.org/) must be installed on your system in order to read, write and edit image metadata using [PyExifTool](https://pypi.org/project/PyExifTool/). Installation instructions can be found on the Exiftool website [here](https://exiftool.org/install.html).
 
+Exiftool is used at the third step of the workflow to embed image metadata. It embeds face regions and names (`XMP-mwg-rs:Region` and `XMP:PersonInImage`) directly in the original file. Note: Exiftool is configured by default to create a copy of the original file when embedding metadata. Original files are renamed with "_orginal" appended to their extension.
+
+Exiftool is used on the viewer page to extract image metadata from image files. It reads face regions from the embedded image metadata.
+
 ## Launching the tool
 
 To launch the Streamlit server within the virtual environment, run the following command while the virtual environment is activated (in your command prompt, you should see `(.venv)` if using a Python virtual environment and `(facelabelerpilot_env)` if using conda):
