@@ -67,7 +67,6 @@ class TestWorkflowSessionState:
 
 
 class TestWorkflowSelectBox:
-
     def test_app_workflow_shows_folder_name_select_box_with_no_options(
         self, at: AppTest, mock_img_dir_path: Path
     ):
@@ -96,7 +95,6 @@ class TestWorkflowSelectBox:
 
 
 class TestRunFaceDetectionWorkflow:
-
     def test_app_workflow_runs_step_1_face_detection_finds_no_faces_empty_folder(
         self, at: AppTest, mock_img_dir_path: Path
     ):
@@ -207,3 +205,72 @@ class TestRunFaceDetectionWorkflow:
         assert len(at.button) == 2
         assert at.button[1].label == "Submit"
 
+    def test_app_workflow_runs_step_2_face_recognition_label_one_face_from_one_image(
+        self,
+        at: AppTest,
+        mock_img_dir_path: Path,
+        mock_face_recognition_face_location,
+        mock_face_recognition_encodings,
+    ):
+        test_folder_1 = mock_img_dir_path / "test folder 1"
+        test_folder_1.mkdir()
+
+        new_image_name = test_folder_1 / "test_image_1.jpg"
+        new_image = np.zeros((100, 100, 3), dtype=np.uint8)
+
+        cv2.imwrite(str(new_image_name), new_image)
+
+        at.run()
+
+        at.selectbox[0].select("test folder 1").run()
+        at.button[0].click().run()
+
+        assert len(at.selectbox) == 2
+
+        assert len(at.selectbox[1].options) == 1
+
+        at.selectbox[1].options.append("Person Shown Name")
+        at.selectbox[1].set_value("Person Shown Name")
+
+        assert len(at.button) == 2
+        assert at.button[1].label == "Submit"
+        at.button[1].click().run()
+
+        assert len(at.success) == 2
+        assert at.success[1].value == "All faces have been labeled!"
+
+        assert len(at.table) == 1
+        assert at.table[0].value.to_dict() == {'counts': {'Person Shown Name': 1}}
+        assert at.table[0].value.shape == (1, 1)
+
+    def test_app_workflow_runs_step_3_export_metadata_one_face_from_one_image(
+        self,
+        at: AppTest,
+        mock_img_dir_path: Path,
+        mock_face_recognition_face_location,
+        mock_face_recognition_encodings,
+    ):
+        test_folder_1 = mock_img_dir_path / "test folder 1"
+        test_folder_1.mkdir()
+
+        new_image_name = test_folder_1 / "test_image_1.jpg"
+        new_image = np.zeros((100, 100, 3), dtype=np.uint8)
+
+        cv2.imwrite(str(new_image_name), new_image)
+
+        at.run()
+
+        at.selectbox[0].select("test folder 1").run()
+        at.button[0].click().run()
+
+        at.selectbox[1].options.append("Person Shown Name")
+        at.selectbox[1].set_value("Person Shown Name")
+
+        at.button[1].click().run()
+
+        assert len(at.subheader) == 3
+        assert at.subheader[2].value == "Step 3: Save Metadata"
+
+        assert len(at.button) == 3
+        assert at.button[1].label == "Write Metadata"
+        assert at.button[2].label == "Export Metadata"
