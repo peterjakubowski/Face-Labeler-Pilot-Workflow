@@ -58,6 +58,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Install ExifTool
+        uses: woss/exiftool-action@v13.43
+
+      - name: Verify ExifTool Installation
+        run: exiftool -ver
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
