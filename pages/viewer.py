@@ -31,6 +31,11 @@ def streamlit_viewer_app():
     # list all the folders inside the watch folder
     # folder_names = [folder for folder in os.listdir(IMG_DIR) if not folder.startswith(".")]
     folder_names = list_folders_in_watch_folder()
+    # Display a warning if there are no subfolders in the 'watch_folder'
+    if not folder_names:
+        st.warning(
+            "The watch folder is empty. Add a folder of images to the watch folder to begin."
+        )
     # choose a folder with the streamlit select box
     select_folder = st.selectbox(label='Choose a folder of images to view.',
                                  options=folder_names,
