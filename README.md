@@ -137,6 +137,47 @@ Controls how the system recognizes faces.
 * **Load Library Faces**: Loads labeled faces from images in the `library` folder if the face classifier is uninitialized. Scans the `library` folder to extract existing face region metadata and names from labeled images. It runs each face through a face recognition model to generate face embeddings to be used in the face classifier.
 * **Reset Face Classifier**: Clears all loaded name metadata and face embedding from the application's memory, resetting the face classifier to an uninitialized state. Your physical image files on disk are not altered.
 
+## Project Structure
+
+```
+Face-Labeler-Pilot-Workflow/
+├── .github/
+│   └── workflows/ 
+│       └── ci.yaml                # Github actions: ruff, mypy, and unit tests
+├── .streamlit/
+│   └── config.toml                # Streamlit configuration options 
+├── library/                       # Face classifier library folder
+│   └── your-labeled-images.jpg    # Place labeled images here to load into face classifier
+├── models/                        
+│   └── face.py                    # Python class definitions
+├── pages/                         # Streamlit pages
+│   ├── settings.py                # Streamlit settings page
+│   ├── viewer.py                  # Streamlit viewer page
+│   └── workflow.py                # Streamlit workflow page
+├── tests/                         # Pytest suite
+│   ├── conftest.py                # Test fixtures
+│   ├── test_app.py                # Streamlit AppTest app tests
+│   ├── test_settings.py           # Streamlit AppTest settings page tests
+│   ├── test_viewer.py             # Streamlit AppTest viewer page tests
+│   └── test_workflow.py           # Streamlit AppTest workflow page tests
+├── utils/
+│   ├── csv.py                     # Exports metadata to csv files
+│   ├── exiftool.py                # Python functions that use ExifTool (PyExifTool)
+│   ├── face_classifier.py         # Streamlit BaseConnection face classifier
+│   ├── helpers.py                 # Streamlit helper functions
+│   ├── image_processing.py        # Image processing with OpenCV
+│   ├── image_readers.py           # Python tools for reading images
+│   └── library.py                 # Python tool to load library images for the face classifier
+├── watchfolder/                   # Place unlabeled images here to send through workflow
+│   └── your-folder-of-images/ 
+│       └── your-images.jpg 
+├── app.py/                        # The main Streamlit app entrypoint
+├── config.py/                     # Face recognition and image settings
+├── environment.yml/               # Conda environment dependencies
+├── README.md                      # This file
+├── requirements.txt               # Python Project dependencies
+└── requirements-dev.txt           # Development and testing dependencies
+```
 
 ## Future Improvements and Features
 
