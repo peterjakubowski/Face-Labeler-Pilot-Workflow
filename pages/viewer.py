@@ -41,7 +41,7 @@ def streamlit_viewer_app():
                                  options=folder_names,
                                  accept_new_options=False,
                                  index=None,
-                                 placeholder=None)
+                                 placeholder='Choose a folder of images')
     # click the button to display annotated images
     annotate_faces = st.button(label="View Images")
 
