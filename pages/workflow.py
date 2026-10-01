@@ -201,7 +201,7 @@ def streamlit_workflow_app():
                 # sort the values by counts in descending order, then by name in ascending
                 df = df.sort_values(by=['counts', 'names'], ascending=[False, True])
                 # display the dataframe
-                st.dataframe(df, hide_index=False, width="content")
+                st.table(df, hide_index=False, width="content")
 
                 #       ==================================================
                 # INFO: ===== Begin Step 3: Write/Save/Embed Metadata ====
