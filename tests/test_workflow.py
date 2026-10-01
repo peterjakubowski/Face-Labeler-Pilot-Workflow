@@ -193,7 +193,7 @@ class TestRunFaceDetectionWorkflow:
         # assert len(at.progress) == 1, "App should display progress bar"
         # assert at.progress[0].label == "Labeling face 1 of 1"
 
-        assert len(at.get("imgs")) == 1, "App should display one image face thumbnail"
+        assert len(at.image) == 1, "App should display one image face thumbnail"
 
         assert len(at.markdown) == 2
         assert at.markdown[1].value.startswith("I don't recognize this face")
