@@ -103,29 +103,29 @@ def run_image_viewer_workflow(select_folder: str):
         source_file: str | None = m.get("SourceFile", None)
         # retrieve region metadata: type, name, area(w, h, x, y)
         region_type: list[str] = (
-            region_type
-            if isinstance(region_type := m.get("XMP:RegionType", []), list)
-            else [region_type]
+            r_type
+            if isinstance(r_type := m.get("XMP:RegionType", []), list)
+            else [r_type]
         )
         region_name: list[str] = (
-            region_name
-            if isinstance(region_name := m.get("XMP:RegionName", []), list)
-            else [region_name]
+            r_name
+            if isinstance(r_name := m.get("XMP:RegionName", []), list)
+            else [r_name]
         )
         region_area_w: list[float] = (
-            region_area_w
-            if isinstance(region_area_w := m.get("XMP:RegionAreaW", []), list)
-            else [region_area_w]
+            r_area_w
+            if isinstance(r_area_w := m.get("XMP:RegionAreaW", []), list)
+            else [r_area_w]
         )
         region_area_h: list[float] = (
-            region_area_h
-            if isinstance(region_area_h := m.get("XMP:RegionAreaH", []), list)
-            else [region_area_h]
+            r_area_h
+            if isinstance(r_area_h := m.get("XMP:RegionAreaH", []), list)
+            else [r_area_h]
         )
         region_area_x: list[float] = (
-            region_area_x
-            if isinstance(region_area_x := m.get("XMP:RegionAreaX", []), list)
-            else [region_area_x]
+            r_area_x
+            if isinstance(r_area_x := m.get("XMP:RegionAreaX", []), list)
+            else [r_area_x]
         )
         region_area_y: list[float] = (
             r_area_y
