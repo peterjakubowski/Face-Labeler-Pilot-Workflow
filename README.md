@@ -1,9 +1,17 @@
+<div align="center">
+
+# Face-Labeler-Pilot-Workflow
+
+<div>
+    <img src="assets/logo-icon.svg" height="120">
+</div>
+
 ![Run CI](https://github.com/peterjakubowski/Face-Labeler-Pilot-Workflow/actions/workflows/ci.yaml/badge.svg)
 <img src="https://img.shields.io/badge/python-3.10%2B-blue.svg" alt="python" />
 <img src="https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey.svg" alt="platform" />
 
-# Face-Labeler-Pilot-Workflow
-
+</div>
+    
 Face Labeler Pilot is an interactive human-in-the-loop Python-based workflow tool for photographers, digital asset managers, and anyone needing to tag people shown in photographs.
 
 The tool is designed to assist in tagging photos from events, portrait sessions, or similar photo shoots that show the same people multiple times across many images. The tool performs best on images of people with their faces turned directly towards the camera, like in group shots and portraits.
