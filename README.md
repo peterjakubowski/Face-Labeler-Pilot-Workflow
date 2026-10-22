@@ -110,7 +110,10 @@ conda env update --file environment.yml --prune
 
 Additionally, [ExifTool](https://exiftool.org/) must be installed on your system in order to read, write and edit image metadata using [PyExifTool](https://pypi.org/project/PyExifTool/). Installation instructions can be found on the Exiftool website [here](https://exiftool.org/install.html).
 
-ExifTool is used at the third step of the workflow to embed image metadata. It embeds face regions and names (`XMP-mwg-rs:Region` and `XMP:PersonInImage`) directly in the original file. Note: ExifTool is configured by default to create a copy of the original file when embedding metadata. Original files are renamed with "_orginal" appended to their extension.
+ExifTool is used at the third step of the workflow to embed image metadata. It embeds face regions and names (`XMP-mwg-rs:Region` and `XMP:PersonInImage`) directly in the original file. 
+
+> [!NOTE]
+> Note: ExifTool is configured by default to create a copy of the original file when embedding metadata. Original files are renamed with "_orginal" appended to their extension.
 
 ExifTool is used on the viewer page to extract image metadata from image files. It reads face regions from the embedded image metadata.
 
@@ -125,6 +128,8 @@ streamlit run app.py
 Then open http://localhost:8501
 
 ## Pages
+
+The Streamlit app consists of three pages: Workflow, Viewer, and Settings.
 
 ### Workflow
 
@@ -146,6 +151,57 @@ Controls how the system recognizes faces.
   * Higher (0.65 – 0.8): The system will aggressively guess and tag more faces, but you may occasionally have to fix a mistagged photo.
 * **Load Library Faces**: Loads labeled faces from images in the `library` folder if the face classifier is uninitialized. Scans the `library` folder to extract existing face region metadata and names from labeled images. It runs each face through a face recognition model to generate face embeddings to be used in the face classifier.
 * **Reset Face Classifier**: Clears all loaded name metadata and face embedding from the application's memory, resetting the face classifier to an uninitialized state. Your physical image files on disk are not altered.
+
+## Save Metadata
+
+Step 3 of the workflow exposes two buttons to write and export metadata. 
+
+### Write Metadata
+
+Writes the person shown and face region to the XMP metadata embedded in the original images on disk. 
+
+> [!NOTE]
+> Note: This action modifies your original files.
+
+#### Person Shown in the Image
+
+Namespace URI: http://iptc.org/std/Iptc4xmpExt/2008-02-29/
+
+Prefix: `Iptc4xmpExt`
+
+| Label        | Property Name                                                                                                                  | Type                          | Description                          |
+|--------------|--------------------------------------------------------------------------------------------------------------------------------|-------------------------------|--------------------------------------|
+| Person Shown | [PersonInImage](https://www.iptc.org/std/photometadata/specification/IPTC-PhotoMetadata-2025.1.html#person-shown-in-the-image) | Bag (Unordered array of text) | Name of a person shown in the image. |
+
+#### MWG Regions
+
+[The Metadata Working Group's schema](https://exiv2.org/tags-xmp-mwg-rs.html) for image region metadata.
+
+Namespace URI: http://www.metadataworkinggroup.com/schemas/regions/
+
+Prefix: `mwg-rs`
+
+| Label                 | Property Name       | Description                                                          |
+|-----------------------|---------------------|----------------------------------------------------------------------|
+| Name                  | Name                | Name of person shown in image region.                                |
+| Type                  | Type                | Type of region (face).                                               |
+| Applied To Dimensions | AppliedToDimensions | Width and height of the image at the time of storing region data.    |
+| Area                  | Area                | Normalized bounding box (w, h, x, y) area that describes the region. |
+
+### Export Metadata (CSV)
+
+Exports the person shown and face region metadata to a csv file named `metadata.csv`. The file is saved on disk next to your original files in the watch folder. Each row represents one face region.
+
+| Columns      | Description                                                      |
+|--------------|------------------------------------------------------------------|
+| filename     | Filename and extension of original image.                        |
+| dim_w        | Width (pixels) of the image at the time of storing region data.  |
+| dim_h        | Height (pixels) of the image at the time of storing region data. |
+| region_w     | Normalized width of bounding box.                                |
+| region_h     | Normalized height of bounding box.                               |
+| region_x     | Normalized x coordinate of the left of the bounding box corner.  |
+| region_y     | Normalized y coordinate of the top of the bounding box corner.   |
+| person_shown | Name of person shown in image region.                            |
 
 ## Project Structure
 
