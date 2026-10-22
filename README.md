@@ -113,7 +113,7 @@ Additionally, [ExifTool](https://exiftool.org/) must be installed on your system
 ExifTool is used at the third step of the workflow to embed image metadata. It embeds face regions and names (`XMP-mwg-rs:Region` and `XMP:PersonInImage`) directly in the original file. 
 
 > [!NOTE]
-> Note: ExifTool is configured by default to create a copy of the original file when embedding metadata. Original files are renamed with "_orginal" appended to their extension.
+> ExifTool is configured by default to create a copy of the original file when embedding metadata. Original files are renamed with "_orginal" appended to their extension.
 
 ExifTool is used on the viewer page to extract image metadata from image files. It reads face regions from the embedded image metadata.
 
@@ -161,7 +161,7 @@ Step 3 of the workflow exposes two buttons to write and export metadata.
 Writes the person shown and face region to the XMP metadata embedded in the original images on disk. 
 
 > [!NOTE]
-> Note: This action modifies your original files.
+> This action modifies your original files.
 
 #### Person Shown in the Image
 
